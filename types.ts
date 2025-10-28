@@ -12,6 +12,8 @@ export interface Lesson {
 export interface Student {
   id: string;
   name: string;
+  birthDate: string; // YYYY-MM-DD
+  contact: string;
   workshop: string;
   turma: string;
   dayOfWeek: string;

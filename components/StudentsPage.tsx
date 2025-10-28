@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Student, Lesson } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Button from './Button';
@@ -9,15 +9,26 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import PrintIcon from './icons/PrintIcon';
 import GraduationCapIcon from './icons/GraduationCapIcon';
+import { useUser } from '../context/UserContext';
 
 const StudentsPage: React.FC = () => {
+  const { user } = useUser();
   const [students, setStudents] = useLocalStorage<Student[]>('students', []);
   const [lessons] = useLocalStorage<Lesson[]>('lessons', []);
   const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentBirthDate, setNewStudentBirthDate] = useState('');
+  const [newStudentContact, setNewStudentContact] = useState('');
   const [selectedClassId, setSelectedClassId] = useState(schedule[0].id);
 
   const [pdfData, setPdfData] = useState<{ student: Student; lessons: Lesson[] } | null>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
+
+  const visibleStudents = useMemo(() => {
+    if (user.role === 'vocal_teacher') {
+      return students.filter(s => s.workshop === 'Canto Coral');
+    }
+    return students;
+  }, [students, user.role]);
 
   useEffect(() => {
     if (pdfData && pdfRef.current) {
@@ -44,7 +55,7 @@ const StudentsPage: React.FC = () => {
 
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newStudentName.trim() === '') return;
+    if (newStudentName.trim() === '' || newStudentBirthDate === '' || newStudentContact.trim() === '') return;
     
     const selectedClass = schedule.find(c => c.id === selectedClassId);
     if(!selectedClass) return;
@@ -52,6 +63,8 @@ const StudentsPage: React.FC = () => {
     const newStudent: Student = {
       id: new Date().toISOString(),
       name: newStudentName.trim(),
+      birthDate: newStudentBirthDate,
+      contact: newStudentContact.trim(),
       workshop: selectedClass.workshop,
       turma: selectedClass.turma,
       dayOfWeek: selectedClass.dayOfWeek,
@@ -59,9 +72,12 @@ const StudentsPage: React.FC = () => {
     };
     setStudents([...students, newStudent].sort((a, b) => a.name.localeCompare(b.name)));
     setNewStudentName('');
+    setNewStudentBirthDate('');
+    setNewStudentContact('');
   };
 
   const handleDeleteStudent = (studentId: string) => {
+    if (user.role !== 'admin') return; // Security check
     setStudents(students.filter(student => student.id !== studentId));
   };
 
@@ -71,47 +87,86 @@ const StudentsPage: React.FC = () => {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     setPdfData({ student, lessons: studentLessons });
   };
+  
+  const calculateAge = (birthDateString: string) => {
+    if (!birthDateString) return '';
+    const birthDate = new Date(birthDateString);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+  };
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-slate-800/50 shadow-sm rounded-lg p-6 border border-slate-200 dark:border-slate-800">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Adicionar Novo Aluno</h2>
-        <form onSubmit={handleAddStudent} className="space-y-4">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div>
-                <label htmlFor="student-name" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Nome do Aluno</label>
-                <input
-                  type="text"
-                  id="student-name"
-                  value={newStudentName}
-                  onChange={(e) => setNewStudentName(e.target.value)}
-                  placeholder="Ex: João da Silva"
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="student-class" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Turma Agendada</label>
-                <select
-                  id="student-class"
-                  value={selectedClassId}
-                  onChange={(e) => setSelectedClassId(e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                >
-                  {schedule.map(c => 
-                    <option key={c.id} value={c.id}>
-                      {c.workshop} - {c.turma} ({c.dayOfWeek}, {c.time})
-                    </option>
-                  )}
-                </select>
-              </div>
-              <Button type="submit" className="w-full">
-                <PlusIcon className="h-5 w-5 mr-2" />
-                Adicionar Aluno
-              </Button>
-           </div>
-        </form>
-      </div>
+      {user.role === 'admin' && (
+        <div className="bg-white dark:bg-slate-800/50 shadow-sm rounded-lg p-6 border border-slate-200 dark:border-slate-800">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Adicionar Novo Aluno</h2>
+          <form onSubmit={handleAddStudent} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="student-name" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Nome Completo</label>
+                  <input
+                    type="text"
+                    id="student-name"
+                    value={newStudentName}
+                    onChange={(e) => setNewStudentName(e.target.value)}
+                    placeholder="Ex: João da Silva"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="student-birthdate" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Data de Nascimento</label>
+                  <input
+                    type="date"
+                    id="student-birthdate"
+                    value={newStudentBirthDate}
+                    onChange={(e) => setNewStudentBirthDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="student-contact" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Contato (Tel ou E-mail)</label>
+                  <input
+                    type="text"
+                    id="student-contact"
+                    value={newStudentContact}
+                    onChange={(e) => setNewStudentContact(e.target.value)}
+                    placeholder="Ex: (11) 99999-9999"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="student-class" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Turma Agendada</label>
+                  <select
+                    id="student-class"
+                    value={selectedClassId}
+                    onChange={(e) => setSelectedClassId(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    {schedule.map(c => 
+                      <option key={c.id} value={c.id}>
+                        {c.workshop} - {c.turma} ({c.dayOfWeek}, {c.time})
+                      </option>
+                    )}
+                  </select>
+                </div>
+            </div>
+            <div className="pt-2">
+                <Button type="submit" className="w-full md:w-auto">
+                  <PlusIcon className="h-5 w-5 mr-2" />
+                  Adicionar Aluno
+                </Button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-slate-800/50 shadow-sm rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 p-6">Lista de Alunos</h2>
@@ -120,36 +175,40 @@ const StudentsPage: React.FC = () => {
             <thead className="bg-slate-50 dark:bg-slate-800">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Nome</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Idade</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Contato</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Oficina</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Turma</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Dia da Semana</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Horário</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Dia e Horário</th>
                 <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-800/50 divide-y divide-slate-200 dark:divide-slate-700">
-              {students.length > 0 ? (
-                students.map((student) => (
+              {visibleStudents.length > 0 ? (
+                visibleStudents.map((student) => (
                   <tr key={student.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-slate-100">{student.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{calculateAge(student.birthDate)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.contact}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.workshop}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.turma}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.dayOfWeek}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.time}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.dayOfWeek}, {student.time}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <button onClick={() => handlePreparePdf(student)} className="p-1 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400" title="Gerar Cronograma PDF">
                         <PrintIcon className="h-5 w-5" />
                       </button>
-                      <button onClick={() => handleDeleteStudent(student.id)} className="p-1 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 ml-2" title="Excluir Aluno">
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
+                      {user.role === 'admin' && (
+                        <button onClick={() => handleDeleteStudent(student.id)} className="p-1 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 ml-2" title="Excluir Aluno">
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
-                    Nenhum aluno cadastrado.
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                    Nenhum aluno encontrado.
                   </td>
                 </tr>
               )}
@@ -172,6 +231,7 @@ const StudentsPage: React.FC = () => {
 
             <section className="my-8 space-y-2 text-base">
                 <p><strong className="font-semibold text-slate-700">Aluno(a):</strong> {pdfData.student.name}</p>
+                <p><strong className="font-semibold text-slate-700">Contato:</strong> {pdfData.student.contact}</p>
                 <p><strong className="font-semibold text-slate-700">Oficina:</strong> {pdfData.student.workshop}</p>
                 <p><strong className="font-semibold text-slate-700">Turma:</strong> {pdfData.student.turma}</p>
                 <p><strong className="font-semibold text-slate-700">Horário Fixo:</strong> {pdfData.student.dayOfWeek}, {pdfData.student.time}</p>

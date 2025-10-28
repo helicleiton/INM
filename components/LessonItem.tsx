@@ -15,11 +15,12 @@ interface LessonItemProps {
   students: Student[];
   onUpdate: (lesson: Lesson) => void;
   onDelete: (lessonId: string) => void;
+  userRole: 'admin' | 'vocal_teacher';
 }
 
 const md = new Remarkable();
 
-const LessonItem: React.FC<LessonItemProps> = ({ lesson, students, onUpdate, onDelete }) => {
+const LessonItem: React.FC<LessonItemProps> = ({ lesson, students, onUpdate, onDelete, userRole }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTopic, setEditedTopic] = useState(lesson.topic);
   const [editedContent, setEditedContent] = useState(lesson.content);
@@ -113,9 +114,11 @@ const LessonItem: React.FC<LessonItemProps> = ({ lesson, students, onUpdate, onD
             <button onClick={handleExportPDF} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors" title="Exportar para PDF">
               <DownloadIcon className="h-5 w-5" />
             </button>
-            <button onClick={() => onDelete(lesson.id)} className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 dark:text-red-400 transition-colors">
-              <TrashIcon className="h-5 w-5" />
-            </button>
+            {userRole === 'admin' && (
+              <button onClick={() => onDelete(lesson.id)} className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500 dark:text-red-400 transition-colors">
+                <TrashIcon className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
         
