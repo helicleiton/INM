@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import GraduationCapIcon from './icons/GraduationCapIcon';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+    initialError?: string | null;
+    setLoginError: (error: string | null) => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ initialError, setLoginError }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        if (initialError) {
+            setError(initialError);
+        }
+    }, [initialError]);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoginError(null); // Limpa o erro no estado pai ao tentar logar novamente
         setLoading(true);
 
         try {

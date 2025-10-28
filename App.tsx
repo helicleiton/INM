@@ -17,6 +17,7 @@ function App() {
   const [authUser, setAuthUser] = useState<FirebaseUser | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -28,18 +29,16 @@ function App() {
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
             setUserRole(userDoc.data().role as UserRole);
+            setLoginError(null); // Limpa o erro em caso de sucesso
           } else {
             console.error("User document not found in Firestore for UID:", user.uid);
-            // Log out user if they have no role document
+            setLoginError("Usuário autenticado, mas sem perfil de permissões. Contate o administrador.");
             await auth.signOut();
-            setUserRole(null);
-            setAuthUser(null);
           }
         } catch (error) {
            console.error("Error fetching user role:", error);
+           setLoginError("Erro ao verificar permissões. Verifique as regras de segurança do Firestore.");
            await auth.signOut();
-           setUserRole(null);
-           setAuthUser(null);
         }
       } else {
         setAuthUser(null);
@@ -53,6 +52,7 @@ function App() {
 
   const handleLogout = () => {
     auth.signOut();
+    setLoginError(null);
     setActiveView('dashboard');
   };
 
@@ -65,7 +65,7 @@ function App() {
   }
 
   if (!authUser || !userRole) {
-    return <LoginPage />;
+    return <LoginPage initialError={loginError} setLoginError={setLoginError} />;
   }
 
   return (
