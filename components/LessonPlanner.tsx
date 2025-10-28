@@ -11,6 +11,8 @@ import { useUser } from '../context/UserContext';
 import { useCollection } from '../hooks/useFirestore';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { suggestLessonContent } from '../services/geminiService';
+import SparklesIcon from './icons/SparklesIcon';
 
 const LessonPlanner: React.FC = () => {
   const { user } = useUser();
@@ -50,6 +52,7 @@ const LessonPlanner: React.FC = () => {
   
   const [newLessonDate, setNewLessonDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [isSuggesting, setIsSuggesting] = useState(false);
 
   useEffect(() => {
     if (availableClasses.length > 0 && !availableClasses.find(c => c.id === selectedClassId)) {
@@ -65,12 +68,39 @@ const LessonPlanner: React.FC = () => {
       date: newLessonDate,
       workshop: selectedClass.workshop,
       turma: selectedClass.turma,
-      topic: 'Novo Tópico',
+      topic: 'Novo Tópico (Manual)',
       content: 'Adicione o conteúdo aqui...',
       materials: [],
       attendance: {},
     };
     await addDoc(collection(db, 'lessons'), newLessonData);
+  };
+
+  const handleSuggestLesson = async () => {
+    const selectedClass = schedule.find(c => c.id === selectedClassId);
+    if (!selectedClass) return;
+
+    setIsSuggesting(true);
+    try {
+        const suggestion = await suggestLessonContent(selectedClass.workshop, selectedClass.turma);
+        
+        const newLessonData: Omit<Lesson, 'id'> = {
+            date: newLessonDate,
+            workshop: selectedClass.workshop,
+            turma: selectedClass.turma,
+            topic: suggestion.topic,
+            content: suggestion.content,
+            materials: [],
+            attendance: {},
+        };
+        await addDoc(collection(db, 'lessons'), newLessonData);
+
+    } catch (error) {
+        console.error("Failed to get AI suggestion:", error);
+        alert("Ocorreu um erro ao buscar a sugestão da IA. Tente novamente.");
+    } finally {
+        setIsSuggesting(false);
+    }
   };
 
   const handleUpdateLesson = async (updatedLesson: Lesson) => {
@@ -105,7 +135,7 @@ const LessonPlanner: React.FC = () => {
       <div className="bg-white dark:bg-slate-800/50 shadow-sm rounded-lg p-6 border border-slate-200 dark:border-slate-800">
         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Adicionar Nova Aula</h2>
         {scheduleLoading ? <p>Carregando turmas...</p> : availableClasses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label htmlFor="date" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Data</label>
                 <input
@@ -116,7 +146,7 @@ const LessonPlanner: React.FC = () => {
                 className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
             </div>
-            <div className="md:col-span-1">
+            <div>
                 <label htmlFor="scheduled-class" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Turma Agendada</label>
                 <select
                 id="scheduled-class"
@@ -131,10 +161,20 @@ const LessonPlanner: React.FC = () => {
                 )}
                 </select>
             </div>
-            <Button onClick={handleAddLesson} className="w-full" disabled={!selectedClassId}>
-                <PlusIcon className="h-5 w-5 mr-2" />
-                Adicionar
+            <div className="md:col-span-2 flex flex-col sm:flex-row gap-2 justify-end pt-2">
+                <Button onClick={handleAddLesson} className="w-full sm:w-auto" variant="secondary" disabled={!selectedClassId || isSuggesting}>
+                    <PlusIcon className="h-5 w-5 mr-2" />
+                    Adicionar Manual
                 </Button>
+                <Button onClick={handleSuggestLesson} className="w-full sm:w-auto" disabled={!selectedClassId || isSuggesting}>
+                    {isSuggesting ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    ) : (
+                        <SparklesIcon className="h-5 w-5 mr-2" />
+                    )}
+                    {isSuggesting ? 'Gerando...' : 'Sugerir com IA'}
+                </Button>
+            </div>
             </div>
         ) : (
             <p className="text-slate-500 dark:text-slate-400">Não há turmas disponíveis para o seu perfil. O administrador precisa cadastrar horários na página 'Horários'.</p>
