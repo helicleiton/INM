@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { ScheduledClass } from '../types';
 import { initialSchedule } from '../data/schedule';
 import Button from './Button';
@@ -9,12 +8,15 @@ import { useUser } from '../context/UserContext';
 import XMarkIcon from './icons/XMarkIcon';
 import CheckIcon from './icons/CheckIcon';
 import PencilIcon from './icons/PencilIcon';
+import { useCollection } from '../hooks/useFirestore';
+import { db } from '../firebase';
+import { collection, query, doc, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 
 const daysOfWeek = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
 
 const SchedulePage: React.FC = () => {
     const { user } = useUser();
-    const [schedule, setSchedule] = useLocalStorage<ScheduledClass[]>('schedule', initialSchedule);
+    const { data: schedule, loading } = useCollection<ScheduledClass>(query(collection(db, 'schedule')));
     
     const [isAdding, setIsAdding] = useState(false);
     const [newClass, setNewClass] = useState<Omit<ScheduledClass, 'id'>>({
@@ -44,9 +46,11 @@ const SchedulePage: React.FC = () => {
         }
     };
 
-    const handleSaveNewClass = () => {
+    const handleSaveNewClass = async () => {
         if (newClass.workshop.trim() && newClass.turma.trim() && newClass.time.trim()) {
-            setSchedule([...schedule, { ...newClass, id: new Date().toISOString() }]);
+            // Use a combination of fields for a more stable ID
+            const newId = `${newClass.workshop}-${newClass.turma}-${newClass.dayOfWeek}-${newClass.time}`.replace(/\s+/g, '-').toLowerCase();
+            await setDoc(doc(db, 'schedule', newId), { ...newClass, id: newId });
             setIsAdding(false);
             setNewClass({ workshop: '', turma: '', dayOfWeek: daysOfWeek[0], time: '' });
         }
@@ -62,16 +66,38 @@ const SchedulePage: React.FC = () => {
         setEditingClass(null);
     };
 
-    const handleSaveEdit = () => {
+    const handleSaveEdit = async () => {
         if (editingClass) {
-            setSchedule(schedule.map(c => c.id === editingId ? editingClass : c));
+            await setDoc(doc(db, 'schedule', editingClass.id), editingClass);
             handleCancelEdit();
         }
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         if (window.confirm('Tem certeza que deseja excluir este horário?')) {
-            setSchedule(schedule.filter(c => c.id !== id));
+            await deleteDoc(doc(db, 'schedule', id));
+        }
+    };
+
+    const handleSeedData = async () => {
+        if (schedule.length > 0) {
+            alert('A agenda já contém dados. A importação foi cancelada.');
+            return;
+        }
+        if (!window.confirm('Isso irá importar os horários padrão para o banco de dados. Deseja continuar?')) {
+            return;
+        }
+        try {
+            const batch = writeBatch(db);
+            initialSchedule.forEach((item) => {
+                const docRef = doc(db, 'schedule', item.id);
+                batch.set(docRef, item);
+            });
+            await batch.commit();
+            alert('Dados iniciais de horários importados com sucesso!');
+        } catch (error) {
+            console.error("Error seeding data: ", error);
+            alert('Ocorreu um erro ao importar os dados.');
         }
     };
 
@@ -81,24 +107,24 @@ const SchedulePage: React.FC = () => {
             <tr key={cls.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/20">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-800 dark:text-slate-200">
                     {isEditingThis ? (
-                        <input type="text" value={editingClass?.workshop || ''} onChange={(e) => handleInputChange('workshop', e.target.value)} className="w-full bg-transparent p-1 border rounded-md border-slate-400 dark:border-slate-500" />
+                        <input type="text" value={editingClass?.workshop || ''} onChange={(e) => handleInputChange('workshop', e.target.value)} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500" />
                     ) : cls.workshop}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
                     {isEditingThis ? (
-                        <input type="text" value={editingClass?.turma || ''} onChange={(e) => handleInputChange('turma', e.target.value)} className="w-20 bg-transparent p-1 border rounded-md border-slate-400 dark:border-slate-500" />
+                        <input type="text" value={editingClass?.turma || ''} onChange={(e) => handleInputChange('turma', e.target.value)} className="w-20 bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500" />
                     ) : cls.turma}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
                     {isEditingThis ? (
-                        <select value={editingClass?.dayOfWeek} onChange={(e) => handleInputChange('dayOfWeek', e.target.value)} className="w-full bg-slate-50 dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500">
+                        <select value={editingClass?.dayOfWeek} onChange={(e) => handleInputChange('dayOfWeek', e.target.value)} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500">
                             {daysOfWeek.map(day => <option key={day} value={day}>{day}</option>)}
                         </select>
                     ) : cls.dayOfWeek}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
                     {isEditingThis ? (
-                        <input type="text" value={editingClass?.time || ''} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full bg-transparent p-1 border rounded-md border-slate-400 dark:border-slate-500" />
+                        <input type="text" value={editingClass?.time || ''} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500" />
                     ) : cls.time}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -163,6 +189,12 @@ const SchedulePage: React.FC = () => {
             )}
             
             <div className="bg-white dark:bg-slate-800/50 shadow-sm rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+                {schedule.length === 0 && !loading && (
+                    <div className="p-4 text-center">
+                        <p className="text-slate-500 dark:text-slate-400 mb-4">Nenhum horário cadastrado. Você pode importar os horários padrão.</p>
+                        <Button onClick={handleSeedData}>Importar Horários Padrão</Button>
+                    </div>
+                )}
                 <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                     <thead className="bg-slate-50 dark:bg-slate-900/50">
@@ -175,7 +207,11 @@ const SchedulePage: React.FC = () => {
                     </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-slate-800/50 divide-y divide-slate-200 dark:divide-slate-700">
-                        {schedule.sort((a,b) => a.workshop.localeCompare(b.workshop)).map(cls => renderClassRow(cls))}
+                        {loading ? (
+                            <tr><td colSpan={5} className="text-center py-4">Carregando horários...</td></tr>
+                        ) : (
+                            schedule.sort((a,b) => a.workshop.localeCompare(b.workshop)).map(cls => renderClassRow(cls))
+                        )}
                     </tbody>
                 </table>
                 </div>

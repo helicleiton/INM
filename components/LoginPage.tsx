@@ -1,28 +1,28 @@
 import React, { useState } from 'react';
 import Button from './Button';
 import GraduationCapIcon from './icons/GraduationCapIcon';
-import { UserRole } from '../types';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
-interface LoginPageProps {
-    onLoginSuccess: (role: UserRole) => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-    const [username, setUsername] = useState('');
+const LoginPage: React.FC = () => {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        if (username.toLowerCase() === 'admin' && password === 'admin123') {
-            setError('');
-            onLoginSuccess('admin');
-        } else if (username.toLowerCase() === 'professor' && password === 'vocal123') {
-            setError('');
-            onLoginSuccess('vocal_teacher');
-        } else {
-            setError('Usuário ou senha inválidos.');
+        setError('');
+        setLoading(true);
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            // onAuthStateChanged in App.tsx will handle redirect
+        } catch (err) {
+            setError('Falha no login. Verifique seu e-mail e senha.');
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -37,21 +37,26 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                          </h1>
                     </div>
                     <p className="text-slate-600 dark:text-slate-400">Acesso ao painel de gerenciamento</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                        Admin: admin@inm.com / admin123
+                        <br/>
+                        Professor: professor@inm.com / vocal123
+                    </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
-                            <label htmlFor="username-address" className="sr-only">Usuário</label>
+                            <label htmlFor="email-address" className="sr-only">E-mail</label>
                             <input
-                                id="username-address"
-                                name="username"
-                                type="text"
-                                autoComplete="username"
+                                id="email-address"
+                                name="email"
+                                type="email"
+                                autoComplete="email"
                                 required
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="appearance-none rounded-none relative block w-full px-3 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 placeholder-slate-500 dark:placeholder-slate-400 text-slate-900 dark:text-slate-100 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Usuário"
+                                placeholder="E-mail"
                             />
                         </div>
                         <div>
@@ -75,8 +80,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     )}
 
                     <div>
-                        <Button type="submit" className="w-full">
-                            Entrar
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            {loading ? 'Entrando...' : 'Entrar'}
                         </Button>
                     </div>
                 </form>

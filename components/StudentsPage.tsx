@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Student, Lesson, ScheduledClass } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import Button from './Button';
 import PlusIcon from './icons/PlusIcon';
 import TrashIcon from './icons/TrashIcon';
-import { initialSchedule } from '../data/schedule';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import PrintIcon from './icons/PrintIcon';
@@ -13,6 +11,9 @@ import { useUser } from '../context/UserContext';
 import PencilIcon from './icons/PencilIcon';
 import CheckIcon from './icons/CheckIcon';
 import XMarkIcon from './icons/XMarkIcon';
+import { useCollection } from '../hooks/useFirestore';
+import { db } from '../firebase';
+import { collection, query, where, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 const dayNameToNumber: { [key: string]: number } = {
   'Domingo': 0,
@@ -29,7 +30,6 @@ const generateFullSchedule = (student: Student) => {
     if (classDay === undefined) return [];
 
     const dates: Date[] = [];
-    // Start date is Nov 1, 2025, End date is Apr 30, 2026
     const startDate = new Date('2025-11-01T12:00:00Z');
     const endDate = new Date('2026-04-30T12:00:00Z');
 
@@ -54,14 +54,23 @@ interface PdfLesson {
 
 const StudentsPage: React.FC = () => {
   const { user } = useUser();
-  const [students, setStudents] = useLocalStorage<Student[]>('students', []);
-  const [lessons] = useLocalStorage<Lesson[]>('lessons', []);
-  const [schedule] = useLocalStorage<ScheduledClass[]>('schedule', initialSchedule);
 
+  const studentsQuery = useMemo(() => {
+    let q = query(collection(db, 'students'));
+    if (user.role === 'vocal_teacher') {
+        q = query(q, where('workshop', '==', 'Técnica Vocal'));
+    }
+    return q;
+  }, [user.role]);
+
+  const { data: students, loading: studentsLoading } = useCollection<Student>(studentsQuery);
+  const { data: lessons } = useCollection<Lesson>(query(collection(db, 'lessons')));
+  const { data: schedule } = useCollection<ScheduledClass>(query(collection(db, 'schedule')));
+  
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentAge, setNewStudentAge] = useState('');
   const [newStudentContact, setNewStudentContact] = useState('');
-  const [selectedClassId, setSelectedClassId] = useState(schedule.length > 0 ? schedule[0].id : '');
+  const [selectedClassId, setSelectedClassId] = useState('');
 
   const [pdfData, setPdfData] = useState<{ student: Student; lessons: PdfLesson[] } | null>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
@@ -70,11 +79,8 @@ const StudentsPage: React.FC = () => {
   const [editingStudentData, setEditingStudentData] = useState<Student | null>(null);
 
   const visibleStudents = useMemo(() => {
-    if (user.role === 'vocal_teacher') {
-      return students.filter(s => s.workshop === 'Técnica Vocal');
-    }
-    return students;
-  }, [students, user.role]);
+    return [...students].sort((a, b) => a.name.localeCompare(b.name));
+  }, [students]);
   
   useEffect(() => {
     if (schedule.length > 0 && !schedule.find(c => c.id === selectedClassId)) {
@@ -107,15 +113,14 @@ const StudentsPage: React.FC = () => {
   }, [pdfData]);
 
 
-  const handleAddStudent = (e: React.FormEvent) => {
+  const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newStudentName.trim() === '' || newStudentAge === '' || newStudentContact.trim() === '' || !selectedClassId) return;
     
     const selectedClass = schedule.find(c => c.id === selectedClassId);
     if(!selectedClass) return;
 
-    const newStudent: Student = {
-      id: new Date().toISOString(),
+    const newStudent: Omit<Student, 'id'> = {
       name: newStudentName.trim(),
       age: parseInt(newStudentAge, 10),
       contact: newStudentContact.trim(),
@@ -124,16 +129,16 @@ const StudentsPage: React.FC = () => {
       dayOfWeek: selectedClass.dayOfWeek,
       time: selectedClass.time,
     };
-    setStudents([...students, newStudent].sort((a, b) => a.name.localeCompare(b.name)));
+    await addDoc(collection(db, 'students'), newStudent);
     setNewStudentName('');
     setNewStudentAge('');
     setNewStudentContact('');
   };
 
-  const handleDeleteStudent = (studentId: string) => {
-    if (user.role !== 'admin') return; // Security check
+  const handleDeleteStudent = async (studentId: string) => {
+    if (user.role !== 'admin') return;
     if (window.confirm('Tem certeza que deseja excluir este aluno?')) {
-      setStudents(students.filter(student => student.id !== studentId));
+      await deleteDoc(doc(db, 'students', studentId));
     }
   };
 
@@ -166,13 +171,11 @@ const StudentsPage: React.FC = () => {
     setEditingStudentData(null);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingStudentData) return;
-    setStudents(
-        students
-            .map(s => (s.id === editingStudentId ? editingStudentData : s))
-            .sort((a, b) => a.name.localeCompare(b.name))
-    );
+    const { id, ...dataToUpdate } = editingStudentData;
+    const studentDoc = doc(db, 'students', id);
+    await updateDoc(studentDoc, dataToUpdate);
     handleCancelEdit();
   };
 
@@ -291,20 +294,20 @@ const StudentsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-800/50 divide-y divide-slate-200 dark:divide-slate-700">
-              {visibleStudents.length > 0 ? (
+              {studentsLoading ? (
+                 <tr><td colSpan={7} className="text-center py-4">Carregando alunos...</td></tr>
+              ) : visibleStudents.length > 0 ? (
                 visibleStudents.map((student) => 
                     editingStudentId === student.id && editingStudentData ? (
                         <tr key={student.id} className="bg-blue-50 dark:bg-blue-900/20">
                             <td className="px-6 py-2"><input type="text" name="name" value={editingStudentData.name} onChange={handleEditInputChange} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm"/></td>
                             <td className="px-6 py-2"><input type="number" name="age" value={editingStudentData.age} onChange={handleEditInputChange} className="w-20 bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm"/></td>
                             <td className="px-6 py-2"><input type="text" name="contact" value={editingStudentData.contact} onChange={handleEditInputChange} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm"/></td>
-                            <td className="px-6 py-2">
+                            <td className="px-6 py-2" colSpan={3}>
                                 <select name="scheduledClassId" value={schedule.find(c => c.workshop === editingStudentData.workshop && c.turma === editingStudentData.turma && c.dayOfWeek === editingStudentData.dayOfWeek && c.time === editingStudentData.time)?.id || ''} onChange={handleEditInputChange} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm">
-                                    {schedule.map(c => <option key={c.id} value={c.id}>{c.workshop}</option>)}
+                                    {schedule.map(c => <option key={c.id} value={c.id}>{`${c.workshop} - Turma ${c.turma} (${c.dayOfWeek}, ${c.time})`}</option>)}
                                 </select>
                             </td>
-                            <td className="px-6 py-2 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{editingStudentData.turma}</td>
-                            <td className="px-6 py-2 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{editingStudentData.dayOfWeek}, {editingStudentData.time}</td>
                             <td className="px-6 py-2 whitespace-nowrap text-center text-sm font-medium">
                                 <div className="flex items-center justify-center gap-2">
                                     <button onClick={handleSaveEdit} className="p-1 text-green-500 hover:text-green-700 dark:hover:text-green-400" title="Salvar"><CheckIcon className="h-5 w-5" /></button>
