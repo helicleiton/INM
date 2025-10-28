@@ -20,7 +20,7 @@ export interface Lesson {
 export interface Student {
   id: string;
   name: string;
-  birthDate: string; // YYYY-MM-DD
+  age: number;
   contact: string;
   workshop: string;
   turma: string;

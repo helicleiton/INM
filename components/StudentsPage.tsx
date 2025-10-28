@@ -51,7 +51,7 @@ const StudentsPage: React.FC = () => {
   const [schedule] = useLocalStorage<ScheduledClass[]>('schedule', initialSchedule);
 
   const [newStudentName, setNewStudentName] = useState('');
-  const [newStudentBirthDate, setNewStudentBirthDate] = useState('');
+  const [newStudentAge, setNewStudentAge] = useState('');
   const [newStudentContact, setNewStudentContact] = useState('');
   const [selectedClassId, setSelectedClassId] = useState(schedule.length > 0 ? schedule[0].id : '');
 
@@ -63,7 +63,7 @@ const StudentsPage: React.FC = () => {
 
   const visibleStudents = useMemo(() => {
     if (user.role === 'vocal_teacher') {
-      return students.filter(s => s.workshop === 'Canto Coral');
+      return students.filter(s => s.workshop === 'Técnica Vocal');
     }
     return students;
   }, [students, user.role]);
@@ -101,7 +101,7 @@ const StudentsPage: React.FC = () => {
 
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newStudentName.trim() === '' || newStudentBirthDate === '' || newStudentContact.trim() === '' || !selectedClassId) return;
+    if (newStudentName.trim() === '' || newStudentAge === '' || newStudentContact.trim() === '' || !selectedClassId) return;
     
     const selectedClass = schedule.find(c => c.id === selectedClassId);
     if(!selectedClass) return;
@@ -109,7 +109,7 @@ const StudentsPage: React.FC = () => {
     const newStudent: Student = {
       id: new Date().toISOString(),
       name: newStudentName.trim(),
-      birthDate: newStudentBirthDate,
+      age: parseInt(newStudentAge, 10),
       contact: newStudentContact.trim(),
       workshop: selectedClass.workshop,
       turma: selectedClass.turma,
@@ -118,7 +118,7 @@ const StudentsPage: React.FC = () => {
     };
     setStudents([...students, newStudent].sort((a, b) => a.name.localeCompare(b.name)));
     setNewStudentName('');
-    setNewStudentBirthDate('');
+    setNewStudentAge('');
     setNewStudentContact('');
   };
 
@@ -139,18 +139,6 @@ const StudentsPage: React.FC = () => {
     }));
 
     setPdfData({ student, lessons: scheduleAsLessons });
-  };
-  
-  const calculateAge = (birthDateString: string) => {
-    if (!birthDateString) return '';
-    const birthDate = new Date(birthDateString);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    return age;
   };
 
   const handleStartEdit = (student: Student) => {
@@ -192,7 +180,7 @@ const StudentsPage: React.FC = () => {
     } else {
         setEditingStudentData({
             ...editingStudentData,
-            [name]: value,
+            [name]: name === 'age' ? parseInt(value, 10) : value,
         });
     }
   };
@@ -218,12 +206,13 @@ const StudentsPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="student-birthdate" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Data de Nascimento</label>
+                  <label htmlFor="student-age" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Idade</label>
                   <input
-                    type="date"
-                    id="student-birthdate"
-                    value={newStudentBirthDate}
-                    onChange={(e) => setNewStudentBirthDate(e.target.value)}
+                    type="number"
+                    id="student-age"
+                    value={newStudentAge}
+                    onChange={(e) => setNewStudentAge(e.target.value)}
+                    placeholder="Ex: 10"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
                   />
@@ -292,7 +281,7 @@ const StudentsPage: React.FC = () => {
                     editingStudentId === student.id && editingStudentData ? (
                         <tr key={student.id} className="bg-blue-50 dark:bg-blue-900/20">
                             <td className="px-6 py-2"><input type="text" name="name" value={editingStudentData.name} onChange={handleEditInputChange} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm"/></td>
-                            <td className="px-6 py-2"><input type="date" name="birthDate" value={editingStudentData.birthDate} onChange={handleEditInputChange} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm"/></td>
+                            <td className="px-6 py-2"><input type="number" name="age" value={editingStudentData.age} onChange={handleEditInputChange} className="w-20 bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm"/></td>
                             <td className="px-6 py-2"><input type="text" name="contact" value={editingStudentData.contact} onChange={handleEditInputChange} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm"/></td>
                             <td className="px-6 py-2">
                                 <select name="scheduledClassId" value={schedule.find(c => c.workshop === editingStudentData.workshop && c.turma === editingStudentData.turma && c.dayOfWeek === editingStudentData.dayOfWeek && c.time === editingStudentData.time)?.id || ''} onChange={handleEditInputChange} className="w-full bg-white dark:bg-slate-700 p-1 border rounded-md border-slate-400 dark:border-slate-500 text-sm">
@@ -311,7 +300,7 @@ const StudentsPage: React.FC = () => {
                     ) : (
                         <tr key={student.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-slate-100">{student.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{calculateAge(student.birthDate)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.age}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.contact}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.workshop}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{student.turma}</td>
@@ -360,6 +349,7 @@ const StudentsPage: React.FC = () => {
 
             <section className="my-8 space-y-2 text-base">
                 <p><strong className="font-semibold text-slate-700">Aluno(a):</strong> {pdfData.student.name}</p>
+                <p><strong className="font-semibold text-slate-700">Idade:</strong> {pdfData.student.age} anos</p>
                 <p><strong className="font-semibold text-slate-700">Contato:</strong> {pdfData.student.contact}</p>
                 <p><strong className="font-semibold text-slate-700">Oficina:</strong> {pdfData.student.workshop}</p>
                 <p><strong className="font-semibold text-slate-700">Turma:</strong> {pdfData.student.turma}</p>

@@ -21,7 +21,7 @@ const LessonPlanner: React.FC = () => {
 
   const availableClasses = useMemo(() => {
     if (user.role === 'vocal_teacher') {
-      return schedule.filter(c => c.workshop === 'Canto Coral');
+      return schedule.filter(c => c.workshop === 'Técnica Vocal');
     }
     return schedule;
   }, [user.role, schedule]);
@@ -39,7 +39,7 @@ const LessonPlanner: React.FC = () => {
 
   const sortedLessons = useMemo(() => {
     const userLessons = user.role === 'vocal_teacher' 
-      ? lessons.filter(l => l.workshop === 'Canto Coral')
+      ? lessons.filter(l => l.workshop === 'Técnica Vocal')
       : lessons;
 
     return [...userLessons].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

@@ -5,9 +5,15 @@ import StudentsPage from './components/StudentsPage';
 import Dashboard from './components/Dashboard';
 import SchedulePage from './components/SchedulePage';
 import { UserProvider } from './context/UserContext';
+import LoginPage from './components/LoginPage';
 
 function App() {
   const [activeView, setActiveView] = useState<'dashboard' | 'planner' | 'students' | 'schedule'>('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  if (!isAuthenticated) {
+    return <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />;
+  }
 
   return (
     <UserProvider>
