@@ -351,50 +351,52 @@ const StudentsPage: React.FC = () => {
       </div>
 
       {pdfData && (
-        <div ref={pdfRef} className="absolute -left-[9999px] top-0 w-[210mm] min-h-[297mm] p-8 bg-white text-black font-sans text-sm">
-           <header className="flex items-center justify-between pb-6 border-b border-slate-300">
+        <div ref={pdfRef} className="absolute -left-[9999px] top-0 w-[210mm] min-h-[297mm] p-10 bg-white text-gray-800 font-sans text-base">
+            <header className="flex items-center justify-between pb-6 border-b-2 border-gray-200">
                 <div className="flex items-center gap-4">
-                    <GraduationCapIcon className="h-12 w-12 text-blue-700" />
+                    <GraduationCapIcon className="h-14 w-14 text-blue-700" />
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">Instituto Novo Milênio</h1>
-                        <p className="text-slate-600 text-lg">Cronograma de Aulas</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Instituto Novo Milênio</h1>
+                        <p className="text-gray-600 text-lg mt-1">Cronograma de Aulas</p>
                     </div>
                 </div>
             </header>
 
-            <section className="my-8 space-y-2 text-base">
-                <p><strong className="font-semibold text-slate-700">Aluno(a):</strong> {pdfData.student.name}</p>
-                <p><strong className="font-semibold text-slate-700">Idade:</strong> {pdfData.student.age} anos</p>
-                <p><strong className="font-semibold text-slate-700">Contato:</strong> {pdfData.student.contact}</p>
-                <p><strong className="font-semibold text-slate-700">Oficina:</strong> {pdfData.student.workshop}</p>
-                <p><strong className="font-semibold text-slate-700">Turma:</strong> {pdfData.student.turma}</p>
-                <p><strong className="font-semibold text-slate-700">Horário Fixo:</strong> {pdfData.student.dayOfWeek}, {pdfData.student.time}</p>
+            <section className="my-10 space-y-3">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                    <p><strong className="font-semibold text-gray-700">Aluno(a):</strong> {pdfData.student.name}</p>
+                    <p><strong className="font-semibold text-gray-700">Idade:</strong> {pdfData.student.age} anos</p>
+                    <p><strong className="font-semibold text-gray-700">Contato:</strong> {pdfData.student.contact}</p>
+                    <p><strong className="font-semibold text-gray-700">Oficina:</strong> {pdfData.student.workshop}</p>
+                    <p><strong className="font-semibold text-gray-700">Turma:</strong> {pdfData.student.turma}</p>
+                    <p><strong className="font-semibold text-gray-700">Horário Fixo:</strong> {pdfData.student.dayOfWeek}, {pdfData.student.time}</p>
+                </div>
             </section>
             
             <section>
-                <h2 className="text-xl font-bold text-slate-800 mb-4">Datas das Aulas (Novembro 2025 - Abril 2026)</h2>
-                <table className="w-full text-left border-collapse">
+                <h2 className="text-2xl font-bold text-gray-800 mb-5">Datas das Aulas (Novembro 2025 - Abril 2026)</h2>
+                <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-slate-100">
-                            <th className="border border-slate-300 p-2 font-semibold text-center w-12">Nº</th>
-                            <th className="border border-slate-300 p-2 font-semibold">Data</th>
-                            <th className="border border-slate-300 p-2 font-semibold">Horário</th>
-                            <th className="border border-slate-300 p-2 font-semibold">Tópico da Aula</th>
+                        <tr className="bg-gray-100 border-b-2 border-gray-300">
+                            <th className="p-3 font-bold uppercase text-gray-600 text-sm text-center w-16">Aula Nº</th>
+                            <th className="p-3 font-bold uppercase text-gray-600 text-sm">Data</th>
+                            <th className="p-3 font-bold uppercase text-gray-600 text-sm">Horário</th>
+                            <th className="p-3 font-bold uppercase text-gray-600 text-sm">Tópico da Aula</th>
                         </tr>
                     </thead>
                     <tbody>
                         {pdfData.lessons.length > 0 ? (
                             pdfData.lessons.map(lesson => (
-                                <tr key={lesson.id} className="even:bg-slate-50">
-                                    <td className="border border-slate-300 p-2 text-center">{lesson.number}</td>
-                                    <td className="border border-slate-300 p-2">{lesson.date ? new Date(lesson.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : ''}</td>
-                                    <td className="border border-slate-300 p-2">{lesson.time}</td>
-                                    <td className="border border-slate-300 p-2">{lesson.topic}</td>
+                                <tr key={lesson.id} className="border-b border-gray-200">
+                                    <td className="p-3 text-center font-medium">{lesson.number}</td>
+                                    <td className="p-3">{lesson.date ? new Date(lesson.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : ''}</td>
+                                    <td className="p-3">{lesson.time}</td>
+                                    <td className="p-3">{lesson.topic}</td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={4} className="border border-slate-300 p-4 text-center text-slate-500">
+                                <td colSpan={4} className="p-4 text-center text-gray-500">
                                     Nenhuma aula agendada para este aluno.
                                 </td>
                             </tr>
@@ -402,6 +404,10 @@ const StudentsPage: React.FC = () => {
                     </tbody>
                 </table>
             </section>
+
+            <footer className="absolute bottom-8 left-8 right-8 text-center text-xs text-gray-400">
+                <p>Gerado pelo INM Planner | Instituto Novo Milênio</p>
+            </footer>
         </div>
       )}
     </div>
