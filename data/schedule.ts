@@ -16,7 +16,7 @@ export const initialSchedule: ScheduledClass[] = [
   { id: 'vio-c', workshop: 'Violão', turma: 'C', dayOfWeek: 'Quinta-feira', time: '18:00' },
 
   // Sábado
-  { id: 'tec-voc-a', workshop: 'Técnica Vocal', turma: 'A', dayOfWeek: 'Sábado', time: '09:00' },
+  { id: 'tec-voc-a', workshop: 'Técnica Vocal', turma: 'A', dayOfWeek: 'Sábado', time: '08:00 - 10:00' },
   { id: 'tec-d', workshop: 'Teclado', turma: 'D', dayOfWeek: 'Sábado', time: '13:00' },
   { id: 'tec-f', workshop: 'Teclado', turma: 'F', dayOfWeek: 'Sábado', time: '14:00' },
   { id: 'mus-tec-c', workshop: 'Musicalização Teclado', turma: 'C', dayOfWeek: 'Sábado', time: '15:00' },

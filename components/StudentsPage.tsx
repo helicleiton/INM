@@ -131,12 +131,17 @@ const StudentsPage: React.FC = () => {
 
   const handlePreparePdf = (student: Student) => {
     const allClassDates = generateFullSchedule(student);
-        
-    const scheduleAsLessons = allClassDates.map(date => ({
-        id: date.toISOString(),
-        date: date.toISOString().split('T')[0], // YYYY-MM-DD format
-        topic: `${student.workshop} - Turma ${student.turma}`,
-    }));
+    const studentLessons = lessons.filter(l => l.workshop === student.workshop && l.turma === student.turma);
+
+    const scheduleAsLessons = allClassDates.map(date => {
+        const dateString = date.toISOString().split('T')[0];
+        const existingLesson = studentLessons.find(l => l.date === dateString);
+        return {
+            id: date.toISOString(),
+            date: dateString,
+            topic: existingLesson ? existingLesson.topic : 'Aula a planejar',
+        };
+    });
 
     setPdfData({ student, lessons: scheduleAsLessons });
   };
@@ -362,7 +367,7 @@ const StudentsPage: React.FC = () => {
                     <thead>
                         <tr className="bg-slate-100">
                             <th className="border border-slate-300 p-2 font-semibold">Data</th>
-                            <th className="border border-slate-300 p-2 font-semibold">Aula</th>
+                            <th className="border border-slate-300 p-2 font-semibold">Tópico da Aula</th>
                         </tr>
                     </thead>
                     <tbody>

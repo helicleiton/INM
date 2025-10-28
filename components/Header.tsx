@@ -5,26 +5,20 @@ import GraduationCapIcon from './icons/GraduationCapIcon';
 import HomeIcon from './icons/HomeIcon';
 import CogIcon from './icons/CogIcon';
 import { useUser } from '../context/UserContext';
+import LogoutIcon from './icons/LogoutIcon';
 
 interface HeaderProps {
   activeView: 'dashboard' | 'planner' | 'students' | 'schedule';
   setActiveView: (view: 'dashboard' | 'planner' | 'students' | 'schedule') => void;
+  onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
-  const { user, setUser } = useUser();
+const Header: React.FC<HeaderProps> = ({ activeView, setActiveView, onLogout }) => {
+  const { user } = useUser();
   
   const navButtonClasses = "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors";
   const activeClasses = "bg-blue-600 text-white shadow-sm";
   const inactiveClasses = "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800";
-
-  const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const role = event.target.value as 'admin' | 'vocal_teacher';
-    setUser({ role });
-    if(role !== 'admin' && activeView === 'schedule'){
-      setActiveView('dashboard');
-    }
-  };
 
   return (
     <header className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
@@ -70,17 +64,15 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                </button>
               )}
             </nav>
-             <div className="hidden md:flex items-center">
-              <label htmlFor="role-select" className="sr-only">Selecionar Função</label>
-              <select 
-                id="role-select"
-                value={user.role}
-                onChange={handleRoleChange}
-                className="ml-4 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm py-1.5 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            <div className="hidden md:flex items-center">
+              <button 
+                onClick={onLogout}
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Sair"
               >
-                <option value="admin">Administrador</option>
-                <option value="vocal_teacher">Professor de Técnica Vocal</option>
-              </select>
+                <LogoutIcon className="h-5 w-5" />
+                <span className="hidden lg:inline">Sair</span>
+              </button>
             </div>
           </div>
         </div>
@@ -117,19 +109,15 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
             <span className="ml-2">Horários</span>
           </button>
         )}
-      </nav>
-      <div className="md:hidden p-2 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-          <label htmlFor="role-select-mobile" className="block text-xs text-center font-medium text-slate-600 dark:text-slate-300 mb-1">Visualizando como:</label>
-          <select 
-            id="role-select-mobile"
-            value={user.role}
-            onChange={handleRoleChange}
-            className="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm py-1.5 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+         <button 
+            onClick={onLogout}
+            className={`${navButtonClasses} ${inactiveClasses} flex-1 justify-center`}
+            title="Sair"
           >
-            <option value="admin">Administrador</option>
-            <option value="vocal_teacher">Professor de Técnica Vocal</option>
-          </select>
-      </div>
+            <LogoutIcon className="h-5 w-5" />
+            <span className="ml-2">Sair</span>
+          </button>
+      </nav>
     </header>
   );
 };

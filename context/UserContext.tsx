@@ -1,6 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-
-type UserRole = 'admin' | 'vocal_teacher';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { UserRole } from '../types';
 
 interface User {
   role: UserRole;
@@ -11,10 +10,19 @@ interface UserContextType {
   setUser: (user: User) => void;
 }
 
+interface UserProviderProps {
+  children: ReactNode;
+  initialRole: UserRole;
+}
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User>({ role: 'admin' });
+export const UserProvider: React.FC<UserProviderProps> = ({ children, initialRole }) => {
+  const [user, setUser] = useState<User>({ role: initialRole });
+
+  useEffect(() => {
+    setUser({ role: initialRole });
+  }, [initialRole]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

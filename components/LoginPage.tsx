@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Button from './Button';
 import GraduationCapIcon from './icons/GraduationCapIcon';
+import { UserRole } from '../types';
 
 interface LoginPageProps {
-    onLoginSuccess: () => void;
+    onLoginSuccess: (role: UserRole) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
@@ -13,10 +14,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        // Simple hardcoded credentials for the administrator
-        if (username === 'admin' && password === 'admin123') {
+        
+        if (username.toLowerCase() === 'admin' && password === 'admin123') {
             setError('');
-            onLoginSuccess();
+            onLoginSuccess('admin');
+        } else if (username.toLowerCase() === 'professor' && password === 'vocal123') {
+            setError('');
+            onLoginSuccess('vocal_teacher');
         } else {
             setError('Usuário ou senha inválidos.');
         }
@@ -32,7 +36,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                            INM Planner
                          </h1>
                     </div>
-                    <p className="text-slate-600 dark:text-slate-400">Acesso ao painel do administrador</p>
+                    <p className="text-slate-600 dark:text-slate-400">Acesso ao painel de gerenciamento</p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                     <div className="rounded-md shadow-sm -space-y-px">

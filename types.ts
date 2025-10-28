@@ -1,3 +1,5 @@
+export type UserRole = 'admin' | 'vocal_teacher';
+
 export interface ScheduledClass {
   id: string;
   workshop: string;

@@ -98,7 +98,7 @@ const SchedulePage: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
                     {isEditingThis ? (
-                        <input type="time" value={editingClass?.time || ''} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full bg-transparent p-1 border rounded-md border-slate-400 dark:border-slate-500" />
+                        <input type="text" value={editingClass?.time || ''} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full bg-transparent p-1 border rounded-md border-slate-400 dark:border-slate-500" />
                     ) : cls.time}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -152,7 +152,7 @@ const SchedulePage: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Horário</label>
-                            <input type="time" value={newClass.time} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md"/>
+                            <input type="text" value={newClass.time} onChange={(e) => handleInputChange('time', e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md" placeholder="Ex: 08:00 ou 08:00-10:00"/>
                         </div>
                      </div>
                      <div className="flex gap-2 mt-4">
