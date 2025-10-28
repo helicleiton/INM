@@ -1,7 +1,11 @@
 import React from 'react';
-import { schedule, ScheduledClass } from '../data/schedule';
+import { initialSchedule } from '../data/schedule';
+import { ScheduledClass } from '../types';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const Dashboard: React.FC = () => {
+  const [schedule] = useLocalStorage<ScheduledClass[]>('schedule', initialSchedule);
+
   const daysOfWeekOrder = [
     'Segunda-feira',
     'Terça-feira',

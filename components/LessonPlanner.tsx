@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Lesson, Student } from '../types';
+import { Lesson, Student, ScheduledClass } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Button from './Button';
 import PlusIcon from './icons/PlusIcon';
 import LessonItem from './LessonItem';
-import { schedule } from '../data/schedule';
+import { initialSchedule } from '../data/schedule';
 import CalendarView from './CalendarView';
 import LessonDetailModal from './LessonDetailModal';
 import ListBulletIcon from './icons/ListBulletIcon';
@@ -15,6 +15,7 @@ const LessonPlanner: React.FC = () => {
   const { user } = useUser();
   const [lessons, setLessons] = useLocalStorage<Lesson[]>('lessons', []);
   const [students] = useLocalStorage<Student[]>('students', []);
+  const [schedule] = useLocalStorage<ScheduledClass[]>('schedule', initialSchedule);
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
@@ -23,9 +24,9 @@ const LessonPlanner: React.FC = () => {
       return schedule.filter(c => c.workshop === 'Canto Coral');
     }
     return schedule;
-  }, [user.role]);
+  }, [user.role, schedule]);
   
-  const [newLessonDate, setNewLessonDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [newLessonDate, setNewLessonDate] = useState<string>('2025-11-04');
   const [selectedClassId, setSelectedClassId] = useState<string>(availableClasses.length > 0 ? availableClasses[0].id : '');
   
   useEffect(() => {

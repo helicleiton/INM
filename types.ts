@@ -1,3 +1,11 @@
+export interface ScheduledClass {
+  id: string;
+  workshop: string;
+  turma: string;
+  dayOfWeek: string;
+  time: string;
+}
+
 export interface Lesson {
   id: string;
   date: string; // YYYY-MM-DD

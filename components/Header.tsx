@@ -3,11 +3,12 @@ import BookOpenIcon from './icons/BookOpenIcon';
 import UsersIcon from './icons/UsersIcon';
 import GraduationCapIcon from './icons/GraduationCapIcon';
 import HomeIcon from './icons/HomeIcon';
+import CogIcon from './icons/CogIcon';
 import { useUser } from '../context/UserContext';
 
 interface HeaderProps {
-  activeView: 'dashboard' | 'planner' | 'students';
-  setActiveView: (view: 'dashboard' | 'planner' | 'students') => void;
+  activeView: 'dashboard' | 'planner' | 'students' | 'schedule';
+  setActiveView: (view: 'dashboard' | 'planner' | 'students' | 'schedule') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
@@ -20,6 +21,9 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
   const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const role = event.target.value as 'admin' | 'vocal_teacher';
     setUser({ role });
+    if(role !== 'admin' && activeView === 'schedule'){
+      setActiveView('dashboard');
+    }
   };
 
   return (
@@ -56,6 +60,15 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
                 <UsersIcon className="h-5 w-5" />
                 <span>Alunos</span>
               </button>
+              {user.role === 'admin' && (
+                 <button
+                 onClick={() => setActiveView('schedule')}
+                 className={`${navButtonClasses} ${activeView === 'schedule' ? activeClasses : inactiveClasses}`}
+               >
+                 <CogIcon className="h-5 w-5" />
+                 <span>Horários</span>
+               </button>
+              )}
             </nav>
              <div className="hidden md:flex items-center">
               <label htmlFor="role-select" className="sr-only">Selecionar Função</label>
@@ -95,6 +108,15 @@ const Header: React.FC<HeaderProps> = ({ activeView, setActiveView }) => {
           <UsersIcon className="h-5 w-5" />
           <span className="ml-2">Alunos</span>
         </button>
+        {user.role === 'admin' && (
+          <button
+            onClick={() => setActiveView('schedule')}
+            className={`${navButtonClasses} ${activeView === 'schedule' ? activeClasses : inactiveClasses} flex-1 justify-center`}
+          >
+            <CogIcon className="h-5 w-5" />
+            <span className="ml-2">Horários</span>
+          </button>
+        )}
       </nav>
       <div className="md:hidden p-2 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
           <label htmlFor="role-select-mobile" className="block text-xs text-center font-medium text-slate-600 dark:text-slate-300 mb-1">Visualizando como:</label>

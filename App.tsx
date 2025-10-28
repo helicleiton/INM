@@ -3,10 +3,11 @@ import Header from './components/Header';
 import LessonPlanner from './components/LessonPlanner';
 import StudentsPage from './components/StudentsPage';
 import Dashboard from './components/Dashboard';
+import SchedulePage from './components/SchedulePage';
 import { UserProvider } from './context/UserContext';
 
 function App() {
-  const [activeView, setActiveView] = useState<'dashboard' | 'planner' | 'students'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'planner' | 'students' | 'schedule'>('dashboard');
 
   return (
     <UserProvider>
@@ -16,6 +17,7 @@ function App() {
           {activeView === 'dashboard' && <Dashboard />}
           {activeView === 'planner' && <LessonPlanner />}
           {activeView === 'students' && <StudentsPage />}
+          {activeView === 'schedule' && <SchedulePage />}
         </main>
       </div>
     </UserProvider>
