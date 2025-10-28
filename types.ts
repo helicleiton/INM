@@ -14,6 +14,6 @@ export interface Student {
   name: string;
   workshop: string;
   turma: string;
-  dayOfWeek?: string;
-  time?: string;
+  dayOfWeek: string;
+  time: string;
 }
