@@ -44,6 +44,14 @@ const generateFullSchedule = (student: Student) => {
     return dates;
 };
 
+interface PdfLesson {
+    id: string;
+    number: number;
+    date: string;
+    time: string;
+    topic: string;
+}
+
 const StudentsPage: React.FC = () => {
   const { user } = useUser();
   const [students, setStudents] = useLocalStorage<Student[]>('students', []);
@@ -55,7 +63,7 @@ const StudentsPage: React.FC = () => {
   const [newStudentContact, setNewStudentContact] = useState('');
   const [selectedClassId, setSelectedClassId] = useState(schedule.length > 0 ? schedule[0].id : '');
 
-  const [pdfData, setPdfData] = useState<{ student: Student; lessons: Partial<Lesson>[] } | null>(null);
+  const [pdfData, setPdfData] = useState<{ student: Student; lessons: PdfLesson[] } | null>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
 
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
@@ -133,12 +141,14 @@ const StudentsPage: React.FC = () => {
     const allClassDates = generateFullSchedule(student);
     const studentLessons = lessons.filter(l => l.workshop === student.workshop && l.turma === student.turma);
 
-    const scheduleAsLessons = allClassDates.map(date => {
+    const scheduleAsLessons: PdfLesson[] = allClassDates.map((date, index) => {
         const dateString = date.toISOString().split('T')[0];
         const existingLesson = studentLessons.find(l => l.date === dateString);
         return {
             id: date.toISOString(),
+            number: index + 1,
             date: dateString,
+            time: student.time,
             topic: existingLesson ? existingLesson.topic : 'Aula a planejar',
         };
     });
@@ -366,7 +376,9 @@ const StudentsPage: React.FC = () => {
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-slate-100">
+                            <th className="border border-slate-300 p-2 font-semibold text-center w-12">Nº</th>
                             <th className="border border-slate-300 p-2 font-semibold">Data</th>
+                            <th className="border border-slate-300 p-2 font-semibold">Horário</th>
                             <th className="border border-slate-300 p-2 font-semibold">Tópico da Aula</th>
                         </tr>
                     </thead>
@@ -374,13 +386,15 @@ const StudentsPage: React.FC = () => {
                         {pdfData.lessons.length > 0 ? (
                             pdfData.lessons.map(lesson => (
                                 <tr key={lesson.id} className="even:bg-slate-50">
+                                    <td className="border border-slate-300 p-2 text-center">{lesson.number}</td>
                                     <td className="border border-slate-300 p-2">{lesson.date ? new Date(lesson.date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : ''}</td>
+                                    <td className="border border-slate-300 p-2">{lesson.time}</td>
                                     <td className="border border-slate-300 p-2">{lesson.topic}</td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={2} className="border border-slate-300 p-4 text-center text-slate-500">
+                                <td colSpan={4} className="border border-slate-300 p-4 text-center text-slate-500">
                                     Nenhuma aula agendada para este aluno.
                                 </td>
                             </tr>
