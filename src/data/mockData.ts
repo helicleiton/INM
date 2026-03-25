@@ -1,0 +1,156 @@
+export const projects = [
+  {
+    id: "1",
+    slug: "educacao-para-todos",
+    title: "Educação para Todos",
+    summary: "Programa de reforço escolar e alfabetização para crianças e adolescentes em situação de vulnerabilidade social.",
+    description: "O projeto Educação para Todos atua diretamente em comunidades periféricas, oferecendo aulas de reforço, oficinas de leitura e acompanhamento pedagógico individualizado. Em parceria com escolas públicas e voluntários, promovemos a permanência escolar e a melhoria no desempenho acadêmico dos participantes.",
+    objectives: ["Reduzir a evasão escolar em 40%", "Melhorar o desempenho em matemática e português", "Promover a leitura como hábito"],
+    area: "Educação",
+    city: "São Paulo, SP",
+    startDate: "2024-03-01",
+    endDate: "2025-12-31",
+    status: "Em andamento",
+    beneficiaries: "350 crianças e adolescentes",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+  },
+  {
+    id: "2",
+    slug: "cultura-viva",
+    title: "Cultura Viva",
+    summary: "Oficinas de arte, música e dança para jovens de comunidades periféricas.",
+    description: "O Cultura Viva leva expressão artística como ferramenta de transformação social. Oferecemos oficinas semanais de música, artes visuais, dança e teatro, incentivando o protagonismo juvenil e a valorização da identidade cultural local.",
+    objectives: ["Formar 200 jovens em linguagens artísticas", "Realizar 4 apresentações culturais por ano", "Criar um acervo artístico comunitário"],
+    area: "Cultura",
+    city: "Rio de Janeiro, RJ",
+    startDate: "2024-01-15",
+    endDate: "2025-06-30",
+    status: "Em andamento",
+    beneficiaries: "200 jovens",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1460518451285-97b6aa326961?w=800",
+  },
+  {
+    id: "3",
+    slug: "capacitacao-profissional",
+    title: "Capacitação Profissional",
+    summary: "Cursos de formação profissional para jovens e adultos em busca de inserção no mercado de trabalho.",
+    description: "Oferecemos cursos gratuitos de informática, administração, empreendedorismo e habilidades socioemocionais, preparando pessoas para o mercado de trabalho e para o desenvolvimento de iniciativas próprias.",
+    objectives: ["Capacitar 500 pessoas por ano", "Inserir 60% dos formados no mercado de trabalho", "Fomentar o empreendedorismo local"],
+    area: "Desenvolvimento Social",
+    city: "Belo Horizonte, MG",
+    startDate: "2024-06-01",
+    endDate: "2025-12-31",
+    status: "Inscrições abertas",
+    beneficiaries: "500 jovens e adultos",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800",
+  },
+  {
+    id: "4",
+    slug: "meio-ambiente-sustentavel",
+    title: "Meio Ambiente Sustentável",
+    summary: "Educação ambiental e ações de reflorestamento em áreas urbanas degradadas.",
+    description: "Desenvolvemos atividades de conscientização ambiental em escolas e comunidades, além de mutirões de plantio de árvores e hortas comunitárias.",
+    objectives: ["Plantar 5.000 mudas", "Sensibilizar 1.000 pessoas", "Criar 10 hortas comunitárias"],
+    area: "Meio Ambiente",
+    city: "Curitiba, PR",
+    startDate: "2024-04-01",
+    endDate: "2025-04-01",
+    status: "Concluído",
+    beneficiaries: "1.000 pessoas",
+    featured: false,
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800",
+  },
+];
+
+export const news = [
+  {
+    id: "1",
+    slug: "inauguracao-sede",
+    title: "Instituto Novo Milênio inaugura nova sede em São Paulo",
+    summary: "Nova sede amplia a capacidade de atendimento e fortalece a atuação institucional na região metropolitana.",
+    content: "Com a inauguração da nova sede, o Instituto Novo Milênio reafirma seu compromisso com a transformação social. O espaço conta com salas de aula, auditório, biblioteca e áreas de convivência, ampliando significativamente a capacidade de atendimento.",
+    category: "Institucional",
+    author: "Equipe INM",
+    date: "2025-02-15",
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+  },
+  {
+    id: "2",
+    slug: "parceria-educacao",
+    title: "Nova parceria fortalece programa de educação",
+    summary: "Acordo com fundação internacional amplia recursos para o projeto Educação para Todos.",
+    content: "O Instituto Novo Milênio firmou parceria estratégica com a Fundação Educação Global, garantindo recursos adicionais para ampliar o atendimento do projeto Educação para Todos em três novos municípios.",
+    category: "Parcerias",
+    author: "Diretoria",
+    date: "2025-01-20",
+    image: "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=800",
+  },
+  {
+    id: "3",
+    slug: "resultados-2024",
+    title: "Balanço 2024: mais de 2.000 vidas transformadas",
+    summary: "Relatório anual mostra crescimento de 45% no número de beneficiados em relação ao ano anterior.",
+    content: "O relatório anual de 2024 do Instituto Novo Milênio revela resultados expressivos: mais de 2.000 pessoas foram diretamente beneficiadas pelos projetos sociais, representando um crescimento de 45% em relação a 2023.",
+    category: "Resultados",
+    author: "Equipe INM",
+    date: "2024-12-10",
+    image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=800",
+  },
+];
+
+export const partners = [
+  { id: "1", name: "Fundação Educação Global", category: "Educação", description: "Parceira estratégica em projetos educacionais." },
+  { id: "2", name: "Instituto Cultura Brasileira", category: "Cultura", description: "Apoio a projetos culturais e artísticos." },
+  { id: "3", name: "Banco Social", category: "Financeiro", description: "Patrocinador de programas de capacitação profissional." },
+  { id: "4", name: "Prefeitura Municipal", category: "Governo", description: "Parceria público-privada em ações sociais." },
+  { id: "5", name: "ONG Ação Verde", category: "Meio Ambiente", description: "Parceira em projetos de sustentabilidade." },
+  { id: "6", name: "Universidade Federal", category: "Educação", description: "Convênio para programas de extensão universitária." },
+];
+
+export const testimonials = [
+  {
+    id: "1",
+    name: "Maria Santos",
+    role: "Mãe de aluno do projeto Educação para Todos",
+    text: "Meu filho mudou completamente depois de participar do projeto. As notas melhoraram e ele redescobriu o gosto pela leitura.",
+  },
+  {
+    id: "2",
+    name: "João Silva",
+    role: "Voluntário desde 2023",
+    text: "Ser voluntário no Instituto Novo Milênio me ensinou tanto quanto eu ensinei. É uma experiência transformadora.",
+  },
+  {
+    id: "3",
+    name: "Ana Oliveira",
+    role: "Beneficiada do programa de Capacitação Profissional",
+    text: "Graças ao curso de informática, consegui meu primeiro emprego formal. Sou eternamente grata ao Instituto.",
+  },
+];
+
+export const transparencyDocs = [
+  { id: "1", title: "Relatório Anual 2024", category: "Relatórios", date: "2025-01-15", type: "PDF" },
+  { id: "2", title: "Estatuto Social", category: "Documentos Institucionais", date: "2020-03-10", type: "PDF" },
+  { id: "3", title: "Prestação de Contas - 2º Semestre 2024", category: "Prestação de Contas", date: "2025-02-01", type: "PDF" },
+  { id: "4", title: "Certidão de Regularidade Fiscal", category: "Certidões", date: "2025-01-05", type: "PDF" },
+  { id: "5", title: "Edital - Seleção de Projetos 2025", category: "Editais", date: "2025-03-01", type: "PDF" },
+];
+
+export const impactNumbers = [
+  { label: "Pessoas beneficiadas", value: 2450 },
+  { label: "Projetos realizados", value: 18 },
+  { label: "Municípios atendidos", value: 12 },
+  { label: "Voluntários ativos", value: 85 },
+];
+
+export const galleryImages = [
+  { id: "1", url: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600", caption: "Oficina de leitura", album: "Educação" },
+  { id: "2", url: "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600", caption: "Evento cultural", album: "Cultura" },
+  { id: "3", url: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600", caption: "Capacitação profissional", album: "Formação" },
+  { id: "4", url: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600", caption: "Ação ambiental", album: "Meio Ambiente" },
+  { id: "5", url: "https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?w=600", caption: "Encontro de voluntários", album: "Voluntariado" },
+  { id: "6", url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600", caption: "Aula de reforço", album: "Educação" },
+];
