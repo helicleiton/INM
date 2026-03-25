@@ -1,9 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { partners } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
 
-const AdminPartners = () => (
+const AdminPartners = () => {
+  const { partners } = useSiteContent();
+  return (
   <div>
     <div className="flex items-center justify-between mb-6">
       <h1 className="font-serif text-2xl text-foreground">Parceiros</h1>
@@ -35,6 +37,7 @@ const AdminPartners = () => (
       </CardContent>
     </Card>
   </div>
-);
+  );
+};
 
 export default AdminPartners;

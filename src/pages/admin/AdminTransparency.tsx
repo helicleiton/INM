@@ -1,9 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { transparencyDocs } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
 
-const AdminTransparency = () => (
+const AdminTransparency = () => {
+  const { transparencyDocs } = useSiteContent();
+  return (
   <div>
     <div className="flex items-center justify-between mb-6">
       <h1 className="font-serif text-2xl text-foreground">Transparência</h1>
@@ -37,6 +39,7 @@ const AdminTransparency = () => (
       </CardContent>
     </Card>
   </div>
-);
+  );
+};
 
 export default AdminTransparency;

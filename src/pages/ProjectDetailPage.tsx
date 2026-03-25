@@ -3,10 +3,12 @@ import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, Calendar, Users, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { projects } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const ProjectDetailPage = () => {
   const { slug } = useParams();
+  const { projects } = useSiteContent();
   const project = projects.find((p) => p.slug === slug);
 
   if (!project) {
@@ -20,6 +22,7 @@ const ProjectDetailPage = () => {
 
   return (
     <div>
+      <PageMeta title={project.title} description={project.summary} />
       <section className="relative h-[50vh] min-h-[400px]">
         <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 hero-gradient opacity-80" />

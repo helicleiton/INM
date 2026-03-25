@@ -3,24 +3,54 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { volunteerFormSchema, type VolunteerFormValues } from "@/lib/schemas/forms";
+import { PageMeta } from "@/components/seo/PageMeta";
+
+const VOLUNTEER_EMAIL = "voluntarios@novomilenio.org.br";
 
 const VolunteerPage = () => {
-  const [submitting, setSubmitting] = useState(false);
+  const form = useForm<VolunteerFormValues>({
+    resolver: zodResolver(volunteerFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      city: "",
+      interest: "",
+      availability: "",
+      motivation: "",
+    },
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setTimeout(() => {
-      toast.success("Inscrição enviada com sucesso! Entraremos em contato em breve.");
-      setSubmitting(false);
-      (e.target as HTMLFormElement).reset();
-    }, 1000);
+  const onSubmit = (values: VolunteerFormValues) => {
+    const body = [
+      `Nome: ${values.name}`,
+      `E-mail: ${values.email}`,
+      `Telefone: ${values.phone}`,
+      `Cidade: ${values.city}`,
+      `Área de interesse: ${values.interest || "—"}`,
+      `Disponibilidade: ${values.availability || "—"}`,
+      "",
+      "Motivação / experiência:",
+      values.motivation,
+    ].join("\n");
+    const subject = `Inscrição voluntário — ${values.name}`;
+    const mailto = `mailto:${VOLUNTEER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+    toast.success("Abrindo seu e-mail para concluir a inscrição.");
+    form.reset();
   };
 
   return (
     <div>
+      <PageMeta
+        title="Voluntariado"
+        description="Seja voluntário no Instituto Novo Milênio e transforme vidas."
+      />
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-serif text-4xl md:text-5xl text-primary-foreground mb-4">Voluntariado</motion.h1>
@@ -52,18 +82,107 @@ const VolunteerPage = () => {
                 <CardTitle className="font-serif text-xl text-foreground">Formulário de Inscrição</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <Input placeholder="Nome completo" required />
-                  <Input type="email" placeholder="E-mail" required />
-                  <Input type="tel" placeholder="Telefone" required />
-                  <Input placeholder="Cidade" required />
-                  <Input placeholder="Área de interesse" />
-                  <Input placeholder="Disponibilidade (ex: sábados pela manhã)" />
-                  <Textarea placeholder="Conte um pouco sobre sua experiência e motivação" rows={4} />
-                  <Button type="submit" className="w-full" disabled={submitting}>
-                    {submitting ? "Enviando..." : "Enviar Inscrição"}
-                  </Button>
-                </form>
+                <p className="text-sm text-muted-foreground mb-4">
+                  O envio abre seu cliente de e-mail com o texto da inscrição para <span className="font-medium text-foreground">{VOLUNTEER_EMAIL}</span>.
+                </p>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome completo</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nome completo" autoComplete="name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>E-mail</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="E-mail" autoComplete="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Telefone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" placeholder="Telefone" autoComplete="tel" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cidade</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Cidade" autoComplete="address-level2" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="interest"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Área de interesse (opcional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Área de interesse" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="availability"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Disponibilidade (opcional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex.: sábados pela manhã" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="motivation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Experiência e motivação</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Conte um pouco sobre sua experiência e motivação" rows={4} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                      {form.formState.isSubmitting ? "Abrindo e-mail..." : "Enviar inscrição"}
+                    </Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </div>

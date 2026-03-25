@@ -1,9 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { news } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
 
 const AdminNews = () => {
+  const { news } = useSiteContent();
   return (
     <div>
       <div className="flex items-center justify-between mb-6">

@@ -3,9 +3,15 @@ import PublicHeader from "./PublicHeader";
 import PublicFooter from "./PublicFooter";
 
 const PublicLayout = () => (
-  <div className="flex flex-col min-h-screen">
+  <div className="relative flex flex-col min-h-screen">
+    <a
+      href="#conteudo-principal"
+      className="absolute left-[-9999px] z-[100] rounded-md bg-primary px-3 py-2 text-primary-foreground outline-none ring-2 ring-ring focus:left-4 focus:top-4"
+    >
+      Ir para o conteúdo
+    </a>
     <PublicHeader />
-    <main className="flex-1">
+    <main id="conteudo-principal" className="flex-1" tabIndex={-1}>
       <Outlet />
     </main>
     <PublicFooter />

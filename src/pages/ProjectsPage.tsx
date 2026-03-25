@@ -3,11 +3,14 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { projects } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const ProjectsPage = () => {
+  const { projects } = useSiteContent();
   return (
     <div>
+      <PageMeta title="Projetos" description="Conheça as iniciativas do Instituto Novo Milênio." />
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-serif text-4xl md:text-5xl text-primary-foreground mb-4">

@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Palette, Users, Leaf, Heart, Target, Eye, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { projects, news, testimonials, partners, impactNumbers } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -11,6 +12,7 @@ const fadeUp = {
 };
 
 const HomePage = () => {
+  const { projects, news, testimonials, partners, impactNumbers } = useSiteContent();
   const featuredProjects = projects.filter((p) => p.featured);
   const areas = [
     { icon: BookOpen, label: "Educação", desc: "Reforço escolar, alfabetização e acesso à leitura." },
@@ -21,6 +23,10 @@ const HomePage = () => {
 
   return (
     <div>
+      <PageMeta
+        title="Início"
+        description="O Instituto Novo Milênio transforma vidas por meio da educação, cultura e ação social."
+      />
       {/* Hero */}
       <section className="hero-gradient relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1920')] bg-cover bg-center opacity-15" />

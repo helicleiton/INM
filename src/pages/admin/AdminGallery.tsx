@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { galleryImages } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
 
-const AdminGallery = () => (
+const AdminGallery = () => {
+  const { galleryImages } = useSiteContent();
+  return (
   <div>
     <div className="flex items-center justify-between mb-6">
       <h1 className="font-serif text-2xl text-foreground">Galeria</h1>
@@ -23,6 +25,7 @@ const AdminGallery = () => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default AdminGallery;

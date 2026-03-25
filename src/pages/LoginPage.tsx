@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { setAdminAuthed } from "@/lib/auth";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,14 @@ const LoginPage = () => {
           <h1 className="font-serif text-2xl text-primary-foreground">Painel Administrativo</h1>
           <p className="text-primary-foreground/70 text-sm mt-1">Instituto Novo Milênio</p>
         </div>
+
+        <Alert className="mb-4 border-accent/50 bg-card/80 text-foreground">
+          <Info className="h-4 w-4 text-accent" />
+          <AlertTitle>Modo demonstração</AlertTitle>
+          <AlertDescription>
+            Este login é apenas para testar o layout do painel. Não há validação de usuário nem servidor — não use como segurança real.
+          </AlertDescription>
+        </Alert>
 
         <Card className="border-border bg-card">
           <CardHeader>

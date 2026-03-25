@@ -2,17 +2,22 @@ import { motion } from "framer-motion";
 import { FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { transparencyDocs } from "@/data/mockData";
-import { useState } from "react";
-
-const categories = ["Todos", ...Array.from(new Set(transparencyDocs.map((d) => d.category)))];
+import { useSiteContent } from "@/context/SiteContentContext";
+import { PageMeta } from "@/components/seo/PageMeta";
+import { useMemo, useState } from "react";
 
 const TransparencyPage = () => {
+  const { transparencyDocs } = useSiteContent();
+  const categories = useMemo(
+    () => ["Todos", ...Array.from(new Set(transparencyDocs.map((d) => d.category)))],
+    [transparencyDocs],
+  );
   const [filter, setFilter] = useState("Todos");
   const filtered = filter === "Todos" ? transparencyDocs : transparencyDocs.filter((d) => d.category === filter);
 
   return (
     <div>
+      <PageMeta title="Transparência" description="Documentos e prestação de contas do Instituto Novo Milênio." />
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-serif text-4xl md:text-5xl text-primary-foreground mb-4">Transparência</motion.h1>

@@ -1,13 +1,16 @@
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { news } from "@/data/mockData";
+import { useSiteContent } from "@/context/SiteContentContext";
+import { PageMeta } from "@/components/seo/PageMeta";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NewsPage = () => {
+  const { news } = useSiteContent();
   return (
     <div>
+      <PageMeta title="Notícias" description="Acompanhe as novidades do Instituto Novo Milênio." />
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-serif text-4xl md:text-5xl text-primary-foreground mb-4">Notícias</motion.h1>
@@ -49,6 +52,7 @@ export default NewsPage;
 
 export const NewsDetailPage = () => {
   const { slug } = useParams();
+  const { news } = useSiteContent();
   const article = news.find((n) => n.slug === slug);
 
   if (!article) {
@@ -62,6 +66,7 @@ export const NewsDetailPage = () => {
 
   return (
     <div>
+      <PageMeta title={article.title} description={article.summary} />
       <section className="relative h-[40vh] min-h-[300px]">
         <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 hero-gradient opacity-80" />

@@ -71,3 +71,18 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Roadmap
+
+Planejamento, prioridades e itens já concluídos: veja [ROADMAP.md](./ROADMAP.md).
+
+## Desenvolvimento local (Windows)
+
+- Instale o [Node.js LTS](https://nodejs.org/) (inclui `npm`).
+- Se no terminal do Cursor o comando `node` não for reconhecido, use o caminho completo, por exemplo:
+  - `& "C:\Program Files\nodejs\node.exe" -v`
+  - `& "C:\Program Files\nodejs\npm.cmd" run dev`
+- Depois de instalar o Node, reinicie o Cursor para atualizar o `PATH` do terminal.
+- O Vite está configurado para a porta **8080** (`vite.config.ts`): abra `http://localhost:8080/`.
+
+Conteúdo editável do site público: `public/data/content.json` (espelho em `src/data/content.json` para o bundle). O app também tenta carregar `/data/content.json` em tempo de execução.

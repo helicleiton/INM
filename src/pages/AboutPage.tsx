@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { Target, Eye, Star, Heart, Users, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageMeta } from "@/components/seo/PageMeta";
 
 const AboutPage = () => {
   return (
     <div>
+      <PageMeta title="Quem Somos" description="História, valores e propósito do Instituto Novo Milênio." />
       <section className="hero-gradient py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-serif text-4xl md:text-5xl text-primary-foreground mb-4">
