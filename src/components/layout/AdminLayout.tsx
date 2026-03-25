@@ -6,6 +6,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { clearAdminAuthed } from "@/lib/auth";
+import { useAuth } from "@/context/AuthContext";
 
 const adminNav = [
   { label: "Dashboard", path: "/admin", icon: LayoutDashboard },
@@ -62,8 +63,13 @@ const AdminLayout = () => {
         </nav>
         <div className="p-4 border-t border-sidebar-border">
           <button
-            onClick={() => {
-              clearAdminAuthed();
+            type="button"
+            onClick={async () => {
+              if (isDemoMode) {
+                clearAdminAuthed();
+              } else {
+                await signOutUser();
+              }
               navigate("/login");
             }}
             className="flex items-center gap-3 text-sm text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors w-full"

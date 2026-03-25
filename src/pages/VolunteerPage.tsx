@@ -9,6 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { volunteerFormSchema, type VolunteerFormValues } from "@/lib/schemas/forms";
 import { PageMeta } from "@/components/seo/PageMeta";
+import { isFirebaseConfigured } from "@/lib/firebase/config";
+import { addInboxMessage } from "@/lib/firebase/messages";
 
 const VOLUNTEER_EMAIL = "voluntarios@novomilenio.org.br";
 
@@ -26,7 +28,31 @@ const VolunteerPage = () => {
     },
   });
 
-  const onSubmit = (values: VolunteerFormValues) => {
+  const onSubmit = async (values: VolunteerFormValues) => {
+    if (isFirebaseConfigured()) {
+      try {
+        await addInboxMessage({
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          subject: `Inscrição voluntário — ${values.name}`,
+          message: values.motivation,
+          source: "volunteer",
+          extra: {
+            city: values.city,
+            interest: values.interest,
+            availability: values.availability,
+          },
+        });
+        toast.success("Inscrição registrada. Entraremos em contato em breve.");
+        form.reset();
+        return;
+      } catch (e) {
+        console.error(e);
+        toast.error("Não foi possível enviar agora. Tente o e-mail ou mais tarde.");
+        return;
+      }
+    }
     const body = [
       `Nome: ${values.name}`,
       `E-mail: ${values.email}`,

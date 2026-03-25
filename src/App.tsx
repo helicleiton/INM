@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteContentProvider } from "@/context/SiteContentContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 import PublicLayout from "@/components/layout/PublicLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
@@ -48,6 +49,7 @@ const RouteFallback = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <AuthProvider>
     <SiteContentProvider>
       <TooltipProvider>
         <Toaster />
@@ -92,6 +94,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </SiteContentProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

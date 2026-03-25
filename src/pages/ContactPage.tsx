@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { contactFormSchema, type ContactFormValues } from "@/lib/schemas/forms";
 import { PageMeta } from "@/components/seo/PageMeta";
+import { isFirebaseConfigured } from "@/lib/firebase/config";
+import { addInboxMessage } from "@/lib/firebase/messages";
 
 const CONTACT_EMAIL = "contato@novomilenio.org.br";
 
@@ -25,7 +27,26 @@ const ContactPage = () => {
     },
   });
 
-  const onSubmit = (values: ContactFormValues) => {
+  const onSubmit = async (values: ContactFormValues) => {
+    if (isFirebaseConfigured()) {
+      try {
+        await addInboxMessage({
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          subject: values.subject,
+          message: values.message,
+          source: "contact",
+        });
+        toast.success("Mensagem enviada. Entraremos em contato em breve.");
+        form.reset();
+        return;
+      } catch (e) {
+        console.error(e);
+        toast.error("Não foi possível enviar agora. Tente o e-mail ou mais tarde.");
+        return;
+      }
+    }
     const body = [
       `Nome: ${values.name}`,
       `E-mail: ${values.email}`,

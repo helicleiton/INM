@@ -8,21 +8,37 @@ import { toast } from "sonner";
 import { setAdminAuthed } from "@/lib/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { signInEmail, isDemoMode } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isDemoMode) {
+      setLoading(true);
+      setTimeout(() => {
+        setAdminAuthed(true);
+        toast.success("Login realizado (modo demonstração).");
+        navigate("/admin");
+        setLoading(false);
+      }, 600);
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
-      // Login é prototípico: guarda uma "sessão" local para liberar rotas do admin.
-      setAdminAuthed(true);
-      toast.success("Login realizado com sucesso!");
+    try {
+      await signInEmail(email, password);
+      toast.success("Login realizado com sucesso.");
       navigate("/admin");
+    } catch {
+      toast.error("E-mail ou senha incorretos.");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -38,9 +54,11 @@ const LoginPage = () => {
 
         <Alert className="mb-4 border-accent/50 bg-card/80 text-foreground">
           <Info className="h-4 w-4 text-accent" />
-          <AlertTitle>Modo demonstração</AlertTitle>
+          <AlertTitle>{isDemoMode ? "Modo demonstração" : "Firebase Authentication"}</AlertTitle>
           <AlertDescription>
-            Este login é apenas para testar o layout do painel. Não há validação de usuário nem servidor — não use como segurança real.
+            {isDemoMode
+              ? "Sem variáveis Firebase, o login é apenas local para testar o layout. Com Firebase configurado, use e-mail e senha de um usuário criado no Console."
+              : "Acesso protegido por Firebase Auth. Crie usuários em Authentication no console do Firebase."}
           </AlertDescription>
         </Alert>
 
@@ -50,8 +68,22 @@ const LoginPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Input type="email" placeholder="E-mail" required />
-              <Input type="password" placeholder="Senha" required />
+              <Input
+                type="email"
+                placeholder="E-mail"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+              />
+              <Input
+                type="password"
+                placeholder="Senha"
+                required={!isDemoMode}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </Button>

@@ -86,3 +86,13 @@ Planejamento, prioridades e itens já concluídos: veja [ROADMAP.md](./ROADMAP.m
 - O Vite está configurado para a porta **8080** (`vite.config.ts`): abra `http://localhost:8080/`.
 
 Conteúdo editável do site público: `public/data/content.json` (espelho em `src/data/content.json` para o bundle). O app também tenta carregar `/data/content.json` em tempo de execução.
+
+## Firebase (backend)
+
+1. Crie um projeto em [Firebase Console](https://console.firebase.google.com/), ative **Authentication** (E-mail/senha) e **Firestore** e **Storage**.
+2. Copie `.env.example` para `.env.local` e preencha as variáveis `VITE_FIREBASE_*` (Configurações do projeto → Seus apps → Web).
+3. Publique as regras de segurança: `firebase deploy --only firestore:rules,storage` (com [Firebase CLI](https://firebase.google.com/docs/cli) instalado) ou cole o conteúdo de `firebase/firestore.rules` e `firebase/storage.rules` no console.
+4. Crie um usuário em **Authentication** para acessar `/admin` (com variáveis Firebase o login deixa de ser só “demonstração”).
+5. No painel **Configurações**, use **“Publicar dados iniciais”** para gravar o JSON padrão em `site/publicContent` no Firestore.
+6. **E-mail automático:** mensagens de formulário são gravadas em `inboxMessages`. Para notificar por e-mail, use uma [Cloud Function](https://firebase.google.com/docs/functions) ou a extensão [Trigger Email](https://extensions.dev/extensions/firebase/firestore-send-email) (não incluída neste repositório).
+7. **Vercel:** adicione as mesmas variáveis `VITE_FIREBASE_*` em Environment Variables e faça um novo deploy.

@@ -46,15 +46,16 @@
 
 | Status | Item |
 |--------|------|
-| [ ] | Backend ou BaaS (Supabase, Firebase, API própria) para notícias, projetos, galeria, mensagens |
-| [ ] | Admin `/admin/*` com CRUD ligado aos dados reais + upload de imagens (storage + regras) |
-| [ ] | Autenticação real (provedor + regras no servidor/API), não só front-end |
-| [ ] | E-mail / notificações ao receber contato (Resend, SendGrid, etc.) |
-| [ ] | Variáveis de ambiente (`.env` local, secrets na Vercel) e previews por PR |
+| [x] | Backend **Firebase**: Firestore (`site/publicContent`), Storage (upload), regras em `firebase/` |
+| [/] | Admin `/admin/*` com CRUD: **Projetos** com criar/editar/excluir + upload de imagem; demais seções ainda em lista (expandir depois) |
+| [x] | Autenticação **Firebase Auth** (e-mail/senha) quando `VITE_FIREBASE_*` está definido; sem env, login continua em modo demonstração (`localStorage`) |
+| [/] | E-mail: mensagens em `inboxMessages` no Firestore; envio automático por e-mail = Cloud Function ou extensão (ver [README](./README.md#firebase-backend)) |
+| [x] | Variáveis `.env.example` + documentação Vercel; previews por PR dependem da configuração do projeto na Vercel |
 
 **Já feito nesta fase**
 
-- [x] Sessão mínima do admin no front-end: flag em `localStorage` (`inm_admin_authed`), `AdminGuard` em `/admin`, login em `/login` seta sessão, “Sair” limpa e redireciona. **(Protótipo — não segurança real.)**
+- [x] Firebase: `src/lib/firebase/*`, `AuthProvider`, formulários públicos gravam em `inboxMessages` quando Firebase está ativo.
+- [x] Sem variáveis Firebase: admin em modo demonstração (`localStorage`) como antes.
 
 ---
 

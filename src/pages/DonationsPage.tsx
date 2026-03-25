@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { donationIntentSchema, type DonationIntentValues } from "@/lib/schemas/forms";
 import { PageMeta } from "@/components/seo/PageMeta";
+import { isFirebaseConfigured } from "@/lib/firebase/config";
+import { addInboxMessage } from "@/lib/firebase/messages";
 
 const DONATIONS_EMAIL = "doacoes@novomilenio.org.br";
 
@@ -24,7 +26,28 @@ const DonationsPage = () => {
     },
   });
 
-  const onSubmit = (values: DonationIntentValues) => {
+  const onSubmit = async (values: DonationIntentValues) => {
+    if (isFirebaseConfigured()) {
+      try {
+        const msg =
+          [values.message, values.amountHint ? `Valor / forma: ${values.amountHint}` : null].filter(Boolean).join("\n\n") ||
+          "Gostaria de apoiar o Instituto Novo Milênio.";
+        await addInboxMessage({
+          name: values.name,
+          email: values.email,
+          subject: `Intenção de doação — ${values.name}`,
+          message: msg,
+          source: "donation",
+        });
+        toast.success("Registro enviado. Nossa equipe retornará com as opções oficiais.");
+        form.reset();
+        return;
+      } catch (e) {
+        console.error(e);
+        toast.error("Não foi possível enviar agora. Tente o e-mail ou mais tarde.");
+        return;
+      }
+    }
     const body = [
       `Nome: ${values.name}`,
       `E-mail: ${values.email}`,
