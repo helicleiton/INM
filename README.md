@@ -93,6 +93,14 @@ Conteúdo editável do site público: `public/data/content.json` (espelho em `sr
 2. Copie `.env.example` para `.env.local` e preencha as variáveis `VITE_FIREBASE_*` (Configurações do projeto → Seus apps → Web).
 3. Publique as regras de segurança: `firebase deploy --only firestore:rules,storage` (com [Firebase CLI](https://firebase.google.com/docs/cli) instalado) ou cole o conteúdo de `firebase/firestore.rules` e `firebase/storage.rules` no console.
 4. Crie um usuário em **Authentication** para acessar `/admin` (com variáveis Firebase o login deixa de ser só “demonstração”).
-5. No painel **Configurações**, use **“Publicar dados iniciais”** para gravar o JSON padrão em `site/publicContent` no Firestore.
+5. No painel **Configurações**, use **“Salvar rascunho inicial”** para gravar o JSON padrão em `site/draftContent` e depois **“Publicar rascunho”** para atualizar `site/publicContent`.
 6. **E-mail automático:** mensagens de formulário são gravadas em `inboxMessages`. Para notificar por e-mail, use uma [Cloud Function](https://firebase.google.com/docs/functions) ou a extensão [Trigger Email](https://extensions.dev/extensions/firebase/firestore-send-email) (não incluída neste repositório).
 7. **Vercel:** adicione as mesmas variáveis `VITE_FIREBASE_*` em Environment Variables e faça um novo deploy.
+
+## Analytics (LGPD)
+
+O site inclui um banner de consentimento. O Google Analytics só é carregado após o usuário aceitar e se `VITE_GA_MEASUREMENT_ID` estiver definido.
+
+## Observabilidade (Sentry)
+
+Se `VITE_SENTRY_DSN` estiver definido, o Sentry é inicializado em produção.

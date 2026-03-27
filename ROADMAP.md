@@ -63,17 +63,18 @@
 
 | Status | Item |
 |--------|------|
-| [ ] | CMS headless (Sanity, Strapi, Directus) ou fluxo rascunho → publicação |
-| [ ] | Multilíngue (i18n), se necessário |
-| [ ] | Analytics + consentimento LGPD (orientação jurídica) |
-| [ ] | E2E com Playwright em fluxos críticos; testes de componentes nas áreas instáveis |
-| [ ] | Observabilidade (Sentry, uptime, alertas de deploy) |
-| [ ] | Hardening: CSP, rate limit em APIs, política de secrets |
+| [x] | Fluxo rascunho → publicação no Firestore (`site/draftContent` → `site/publicContent`) |
+| [x] | Multilíngue (i18n) básico (`react-i18next`) + seletor PT/EN no header |
+| [x] | Analytics + consentimento LGPD: banner + carregamento condicional (GA via `VITE_GA_MEASUREMENT_ID`) |
+| [x] | E2E com Playwright em fluxos críticos; teste de componente do banner de consentimento |
+| [x] | Observabilidade: Sentry opcional via `VITE_SENTRY_DSN` |
+| [x] | Hardening: CSP e headers de segurança via `vercel.json` |
 
 **Já feito nesta fase**
 
 - [x] Repositório Git inicializado; commit inicial; push para [helicleiton/INM](https://github.com/helicleiton/INM) (branch `main`).
 - [x] Deploy em produção na Vercel (projeto ligado ao repositório; domínio `*.vercel.app`).
+- [x] `vercel.json` com CSP/headers; fluxo de rascunho/publicação no Firebase; i18n; consentimento LGPD; Sentry; testes (Vitest + Playwright).
 
 ---
 

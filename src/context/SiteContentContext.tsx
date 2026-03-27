@@ -4,7 +4,12 @@ import { toast } from "sonner";
 import type { SiteContent } from "@/types/site-content";
 import initialContent from "@/data/content.json";
 import { isFirebaseConfigured } from "@/lib/firebase/config";
-import { subscribeSiteContent, writeSiteContent } from "@/lib/firebase/content";
+import {
+  publishDraftToPublic,
+  subscribeDraftSiteContent,
+  subscribeSiteContent,
+  writeDraftSiteContent,
+} from "@/lib/firebase/content";
 
 const bundled: SiteContent = initialContent as SiteContent;
 
@@ -15,17 +20,22 @@ async function fetchSiteContent(): Promise<SiteContent> {
 }
 
 type SiteCtxValue = {
+  /** Conteúdo publicado (o site público consome isto). */
   data: SiteContent;
+  /** Conteúdo em rascunho (editável no admin). Pode não existir ainda. */
+  draft: SiteContent | null;
   isLoading: boolean;
   firebaseActive: boolean;
-  saveSiteContent: (next: SiteContent) => Promise<void>;
-  seedFromBundled: () => Promise<void>;
+  saveDraftSiteContent: (next: SiteContent) => Promise<void>;
+  publishDraft: () => Promise<void>;
+  seedDraftFromBundled: () => Promise<void>;
 };
 
 const SiteCtx = createContext<SiteCtxValue | null>(null);
 
 export function SiteContentProvider({ children }: { children: ReactNode }) {
   const [remote, setRemote] = useState<SiteContent | null>(null);
+  const [draft, setDraft] = useState<SiteContent | null>(null);
   const [fsLoading, setFsLoading] = useState(isFirebaseConfigured());
 
   const firebaseActive = isFirebaseConfigured();
@@ -35,16 +45,33 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
       setFsLoading(false);
       return;
     }
-    const unsub = subscribeSiteContent(
+
+    let pending = 2;
+    const done = () => {
+      pending -= 1;
+      if (pending <= 0) setFsLoading(false);
+    };
+
+    const unsubPublic = subscribeSiteContent(
       (d) => {
         setRemote(d);
-        setFsLoading(false);
+        done();
       },
-      () => {
-        setFsLoading(false);
-      },
+      () => done(),
     );
-    return () => unsub();
+
+    const unsubDraft = subscribeDraftSiteContent(
+      (d) => {
+        setDraft(d);
+        done();
+      },
+      () => done(),
+    );
+
+    return () => {
+      unsubPublic();
+      unsubDraft();
+    };
   }, [firebaseActive]);
 
   const jsonQuery = useQuery({
@@ -64,41 +91,58 @@ export function SiteContentProvider({ children }: { children: ReactNode }) {
 
   const isLoading = firebaseActive ? fsLoading : jsonQuery.isLoading;
 
-  const saveSiteContent = useCallback(
+  const saveDraftSiteContent = useCallback(
     async (next: SiteContent) => {
       if (!firebaseActive) {
         toast.error("Configure o Firebase (variáveis VITE_FIREBASE_*) para salvar na nuvem.");
         return;
       }
       try {
-        await writeSiteContent(next);
-        toast.success("Conteúdo publicado no Firebase.");
+        await writeDraftSiteContent(next);
+        toast.success("Rascunho salvo.");
       } catch (e) {
         console.error(e);
-        toast.error("Erro ao salvar. Verifique o login e as regras do Firestore.");
+        toast.error("Erro ao salvar rascunho. Verifique o login e as regras do Firestore.");
         throw e;
       }
     },
     [firebaseActive],
   );
 
-  const seedFromBundled = useCallback(async () => {
+  const publishDraft = useCallback(async () => {
     if (!firebaseActive) {
       toast.error("Firebase não configurado.");
       return;
     }
-    await saveSiteContent(bundled);
-  }, [firebaseActive, saveSiteContent]);
+    try {
+      await publishDraftToPublic();
+      toast.success("Rascunho publicado. O site público será atualizado.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Falha ao publicar. Verifique se existe rascunho e se você está logado.");
+      throw e;
+    }
+  }, [firebaseActive]);
+
+  const seedDraftFromBundled = useCallback(async () => {
+    if (!firebaseActive) {
+      toast.error("Firebase não configurado.");
+      return;
+    }
+    await saveDraftSiteContent(bundled);
+  }, [firebaseActive, saveDraftSiteContent]);
 
   const value = useMemo<SiteCtxValue>(
     () => ({
       data,
+      draft,
       isLoading,
       firebaseActive,
-      saveSiteContent,
-      seedFromBundled,
+      saveDraftSiteContent,
+      publishDraft,
+      seedDraftFromBundled,
     }),
-    [data, isLoading, firebaseActive, saveSiteContent, seedFromBundled],
+    [data, draft, isLoading, firebaseActive, saveDraftSiteContent, publishDraft, seedDraftFromBundled],
   );
 
   return <SiteCtx.Provider value={value}>{children}</SiteCtx.Provider>;
@@ -118,8 +162,10 @@ export function useSiteContentActions() {
     throw new Error("useSiteContentActions deve ser usado dentro de SiteContentProvider");
   }
   return {
-    saveSiteContent: ctx.saveSiteContent,
-    seedFromBundled: ctx.seedFromBundled,
+    draft: ctx.draft,
+    saveDraftSiteContent: ctx.saveDraftSiteContent,
+    publishDraft: ctx.publishDraft,
+    seedDraftFromBundled: ctx.seedDraftFromBundled,
     isLoading: ctx.isLoading,
     firebaseActive: ctx.firebaseActive,
   };

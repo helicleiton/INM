@@ -47,8 +47,9 @@ const emptyProject = (): Project => ({
 });
 
 const AdminProjects = () => {
-  const content = useSiteContent();
-  const { saveSiteContent, firebaseActive } = useSiteContentActions();
+  const published = useSiteContent();
+  const { saveDraftSiteContent, firebaseActive, draft } = useSiteContentActions();
+  const content = draft ?? published;
   const projects = content.projects;
 
   const [open, setOpen] = useState(false);
@@ -99,7 +100,7 @@ const AdminProjects = () => {
       } else {
         nextProjects = content.projects.map((p) => (p.id === draft.id ? nextProject : p));
       }
-      await saveSiteContent({ ...content, projects: nextProjects });
+      await saveDraftSiteContent({ ...content, projects: nextProjects });
       setOpen(false);
     } finally {
       setSaving(false);
@@ -112,7 +113,7 @@ const AdminProjects = () => {
       return;
     }
     if (!window.confirm("Excluir este projeto?")) return;
-    await saveSiteContent({
+    await saveDraftSiteContent({
       ...content,
       projects: content.projects.filter((p) => p.id !== id),
     });

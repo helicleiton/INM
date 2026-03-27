@@ -8,17 +8,27 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 const AdminSettings = () => {
-  const { seedFromBundled, firebaseActive } = useSiteContentActions();
+  const { seedDraftFromBundled, publishDraft, firebaseActive, draft } = useSiteContentActions();
   const [seeding, setSeeding] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   const handleSeed = async () => {
     setSeeding(true);
     try {
-      await seedFromBundled();
+      await seedDraftFromBundled();
     } catch {
       toast.error("Falha ao publicar dados iniciais.");
     } finally {
       setSeeding(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      await publishDraft();
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -34,11 +44,21 @@ const AdminSettings = () => {
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
               O conteúdo público do site é lido do documento Firestore <code className="text-xs bg-muted px-1 rounded">site/publicContent</code>.
-              Se o site ainda mostra só o JSON embutido, publique os dados iniciais uma vez (ou edite em Projetos / outras telas).
+              No fluxo avançado, o admin salva em <code className="text-xs bg-muted px-1 rounded">site/draftContent</code> e publica manualmente para o site.
             </p>
-            <Button type="button" onClick={handleSeed} disabled={seeding}>
-              {seeding ? "Publicando…" : "Publicar dados iniciais (JSON padrão) no Firebase"}
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button type="button" onClick={handleSeed} disabled={seeding}>
+                {seeding ? "Salvando…" : "Salvar rascunho inicial (JSON padrão)"}
+              </Button>
+              <Button type="button" variant="default" onClick={handlePublish} disabled={publishing || !draft}>
+                {publishing ? "Publicando…" : "Publicar rascunho no site"}
+              </Button>
+            </div>
+            {!draft && (
+              <p className="text-xs text-muted-foreground">
+                Ainda não há rascunho salvo. Use “Salvar rascunho inicial” para criar.
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               Variáveis: copie <code>.env.example</code> para <code>.env.local</code> e preencha com o projeto Firebase.
               Na Vercel, adicione as mesmas variáveis em Project → Settings → Environment Variables.

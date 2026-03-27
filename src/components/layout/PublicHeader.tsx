@@ -3,21 +3,23 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const navItems = [
-  { label: "Início", path: "/" },
-  { label: "Quem Somos", path: "/quem-somos" },
-  { label: "Projetos", path: "/projetos" },
-  { label: "Notícias", path: "/noticias" },
-  { label: "Galeria", path: "/galeria" },
-  { label: "Transparência", path: "/transparencia" },
-  { label: "Voluntariado", path: "/voluntariado" },
-  { label: "Parceiros", path: "/parceiros" },
-  { label: "Doações", path: "/doacoes" },
-  { label: "Contato", path: "/contato" },
+  { key: "nav.home", path: "/" },
+  { key: "nav.about", path: "/quem-somos" },
+  { key: "nav.projects", path: "/projetos" },
+  { key: "nav.news", path: "/noticias" },
+  { key: "nav.gallery", path: "/galeria" },
+  { key: "nav.transparency", path: "/transparencia" },
+  { key: "nav.volunteer", path: "/voluntariado" },
+  { key: "nav.partners", path: "/parceiros" },
+  { key: "nav.donations", path: "/doacoes" },
+  { key: "nav.contact", path: "/contato" },
 ];
 
 const PublicHeader = () => {
+  const { t, i18n } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
 
@@ -45,14 +47,23 @@ const PublicHeader = () => {
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
-              {item.label}
+              {t(item.key)}
             </Link>
           ))}
         </nav>
 
         <div className="hidden lg:flex items-center gap-2">
+          <select
+            value={i18n.language}
+            onChange={(e) => i18n.changeLanguage(e.target.value)}
+            aria-label="Idioma"
+            className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground"
+          >
+            <option value="pt-BR">PT</option>
+            <option value="en">EN</option>
+          </select>
           <Button asChild size="sm" variant="default">
-            <Link to="/doacoes">Doe Agora</Link>
+            <Link to="/doacoes">{t("nav.donateNow")}</Link>
           </Button>
         </div>
 
@@ -85,11 +96,13 @@ const PublicHeader = () => {
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
-                  {item.label}
+                  {t(item.key)}
                 </Link>
               ))}
               <Button asChild size="sm" className="mt-2">
-                <Link to="/doacoes" onClick={() => setMobileOpen(false)}>Doe Agora</Link>
+                <Link to="/doacoes" onClick={() => setMobileOpen(false)}>
+                  {t("nav.donateNow")}
+                </Link>
               </Button>
             </nav>
           </motion.div>
